@@ -1,0 +1,13 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rocket = "0.5.1"
+jsonwebtoken = "9" # For token generation
+serde = {version = "1.0", features = ["derive"] }
+argon2 = "0.3" # For password hashing
+lettre = "0.10" # For email sending
+diesel = { version = "2.2.0", features = ["mysql"] }
+dotenvy = "0.15" # For environment variable management
