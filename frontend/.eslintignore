@@ -1,0 +1,4 @@
+.eslintrc.cjs
+.prettierrc.cjs
+vite.config.js
+*.config.js
