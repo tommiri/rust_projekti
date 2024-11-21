@@ -11,3 +11,4 @@ argon2 = "0.3" # For password hashing
 lettre = "0.10" # For email sending
 diesel = { version = "2.2.0", features = ["mysql"] }
 dotenvy = "0.15" # For environment variable management
+mysqlclient-sys = "0.4.1"
