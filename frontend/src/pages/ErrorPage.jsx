@@ -1,11 +1,10 @@
-
-const ErrorPage = () => {
+function ErrorPage() {
   return (
     <>
-      <h1 className="page__header">Oops, something went wrong!</h1>
-      <p className="page__text">Not finding that page you are looking for.</p>
+      <h1>Something went wrong!</h1>
+      <p> Not finding that page you are looking for.</p>
     </>
-  )
+  );
 }
 
 export default ErrorPage;
