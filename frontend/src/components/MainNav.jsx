@@ -1,17 +1,18 @@
-import { Button } from './ui/button';
+import { Link } from 'react-router-dom';
 
-const mainNavItems = ['A', 'B', 'C'];
-
-const MainNav = () => {
+function MainNav() {
   return (
-    <div className="mr-4 hidden gap-2 md:flex">
-      {mainNavItems.map((item, index) => (
-        <Button key={index} variant="link">
-          {item}
-        </Button>
-      ))}
+    <div className="hidden w-full md:flex">
+      <nav className="ml-auto mr-28 flex items-center gap-6 text-white lg:gap-8">
+        <div className="hover:underline">
+          <Link to="/login">Login</Link>
+        </div>
+        <div className="hover:underline">
+          <Link to="/register">Register</Link>
+        </div>
+      </nav>
     </div>
   );
-};
+}
 
 export default MainNav;

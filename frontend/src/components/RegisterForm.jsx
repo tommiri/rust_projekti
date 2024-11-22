@@ -11,11 +11,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const RegisterForm = () => {
+function RegisterForm() {
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
-        <CardTitle className="text-xl">Luo tili</CardTitle>
+        <CardTitle className="text-2xl">Rekisteröidy</CardTitle>
         <CardDescription>Anna tietosi tilin luomista varten</CardDescription>
       </CardHeader>
       <CardContent>
@@ -51,6 +51,6 @@ const RegisterForm = () => {
       </CardContent>
     </Card>
   );
-};
+}
 
 export default RegisterForm;

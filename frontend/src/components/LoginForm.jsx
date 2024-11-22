@@ -19,7 +19,7 @@ export const iframeHeight = '600px';
 export const containerClassName =
   'w-full h-screen flex items-center justify-center px-4';
 
-const LoginForm = () => {
+function LoginForm() {
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
@@ -32,15 +32,11 @@ const LoginForm = () => {
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Sähköposti</Label>
-            <Input
-              id="email"
-              type="email"
-              required
-            />
+            <Input id="email" type="email" required />
           </div>
           <div className="grid gap-2">
             <div className="flex items-center">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Salasana</Label>
               <Link to="#" className="ml-auto inline-block text-sm underline">
                 Unohditko salasanasi?
               </Link>
@@ -60,6 +56,6 @@ const LoginForm = () => {
       </CardContent>
     </Card>
   );
-};
+}
 
 export default LoginForm;

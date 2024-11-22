@@ -2,3 +2,4 @@
 .prettierrc.cjs
 vite.config.js
 *.config.js
+src/lib/utils.js

@@ -1,13 +1,17 @@
-import SiteHeader from '@/components/SiteHeader';
+import SiteHeader from '@components/Header';
 import { Outlet } from 'react-router-dom';
 
-const RootLayout = () => {
+function RootLayout() {
   return (
     <>
-      <SiteHeader />
+      <div className="mb-8">
+        {' '}
+        {/* Add 2rem margin bottom */}
+        <SiteHeader />
+      </div>
       <Outlet />
     </>
   );
-};
+}
 
 export default RootLayout;
