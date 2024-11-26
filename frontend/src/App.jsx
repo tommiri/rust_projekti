@@ -8,6 +8,7 @@ import RootLayout from './pages/RootLayout';
 import ErrorPage from './pages/ErrorPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 
 const router = createBrowserRouter([
   {
@@ -18,7 +19,7 @@ const router = createBrowserRouter([
       { index: true, element: <Navigate to="/login" /> }, // Redirect to login page
       { path: '/login', element: <Login /> },
       { path: '/register', element: <Register /> },
-      { path: '/profile' },
+      { path: '/profile' , element: <Profile /> },
     ],
   },
 ]);
