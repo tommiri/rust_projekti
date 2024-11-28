@@ -1,42 +1,119 @@
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  Form,
+  FormField,
+  FormControl,
+  FormLabel,
+  FormItem,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import register from '@/services/register';
+import { useAuth } from '@/providers/authProvider';
 
-function RegisterForm() {
+const FormSchema = z.object({
+  firstName: z.string().min(1, 'Etunimi on pakollinen'),
+  lastName: z.string().min(1, 'Sukunimi on pakollinen'),
+  email: z
+    .string()
+    .min(1, 'Sähköposti on pakollinen')
+    .email('Virheellinen sähköpostiosoite'),
+  password: z.string().min(0, 'Salasana on pakollinen.'),
+});
+
+const RegisterForm = () => {
+  const navigate = useNavigate();
+  const auth = useAuth();
+
+  const form = useForm({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+    },
+  });
+
+  const handleRegister = (values) => {
+    const firstName = values.firstName;
+    const lastName = values.lastName;
+    const email = values.email;
+    const password = values.password;
+    const token = register(firstName, lastName, email, password);
+    auth.setToken(token);
+    navigate('/profile');
+  };
+
   return (
-    <Card className="mx-auto max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl">Rekisteröidy</CardTitle>
-        <CardDescription>Anna tietosi tilin luomista varten</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleRegister)}>
         <div className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="first-name">Etunimi</Label>
-              <Input id="first-name" required />
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="firstName">Etunimi</FormLabel>
+                    <FormControl>
+                      <Input id="firstName" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="last-name">Sukunimi</Label>
-              <Input id="last-name" required />
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="lastName">Sukunimi</FormLabel>
+                    <FormControl>
+                      <Input id="lastName" {...field} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="email">Sähköposti</Label>
-            <Input id="email" type="email" required />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="email">Sähköposti</FormLabel>
+                  <FormControl>
+                    <Input id="email" type="email" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="password">Salasana</Label>
-            <Input id="password" type="password" />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="password">Salasana</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="password"
+                      type="password"
+                      autoComplete="on"
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
           <Button type="submit" className="w-full">
             Luo tili
@@ -48,9 +125,9 @@ function RegisterForm() {
             Kirjaudu sisään
           </Link>
         </div>
-      </CardContent>
-    </Card>
+      </form>
+    </Form>
   );
-}
+};
 
 export default RegisterForm;
