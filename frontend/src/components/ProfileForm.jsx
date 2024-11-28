@@ -44,6 +44,10 @@ function ProfileForm() {
             <Label htmlFor="password">Salasana</Label>
             <Input id="passwond" type="password" />
           </div>
+          <div className="grid gap-2">
+            <Label htmlFor="password">Salasana uudestaan</Label>
+            <Input id="passwond" type="password" />
+          </div>
           <Button type="submit" className="w-full">
             Vaihda
           </Button>
