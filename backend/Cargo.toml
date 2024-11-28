@@ -4,11 +4,20 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-rocket = "0.5.1"
+rocket = {version = "0.5.1", features = ["json", "tls"]}
 jsonwebtoken = "9" # For token generation
 serde = {version = "1.0", features = ["derive"] }
-argon2 = "0.3" # For password hashing
+bcrypt = "0.16.0" # For password hashing
 lettre = "0.10" # For email sending
-diesel = { version = "2.2.0", features = ["mysql"] }
+diesel = { version = "2.2.0", features = ["mysql", "chrono", "r2d2"] }
 dotenvy = "0.15" # For environment variable management
 mysqlclient-sys = "0.4.1"
+chrono = "0.4.38"
+
+[dependencies.uuid]
+version = "1.11.0"
+features = [
+    "v4",                # Lets you generate random UUIDs
+    "fast-rng",          # Use a faster (but still sufficiently random) RNG
+    "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+]
