@@ -1,7 +1,7 @@
-import LoginForm from '@components/LoginForm';
+import LoginCard from '@/components/LoginCard';
 
-function Login() {
-  return <LoginForm />;
-}
+const Login = () => {
+  return <LoginCard />;
+};
 
 export default Login;

@@ -1,47 +1,86 @@
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  Form,
+  FormField,
+  FormControl,
+  FormLabel,
+  FormItem,
+} from '@/components/ui/form';
+import login from '@/services/login';
+import { useAuth } from '@/providers/authProvider';
 
-export const description =
-  "A login form with email and password. There's an option to login with Google and a link to sign up if you don't have an account.";
+const FormSchema = z.object({
+  email: z
+    .string()
+    .min(0, 'Sähköposti on pakollinen')
+    .email('Virheellinen sähköpostiosoite'),
+  password: z.string().min(1, 'Salasana on pakollinen.'),
+});
 
-export const iframeHeight = '600px';
+const LoginForm = () => {
+  const navigate = useNavigate();
+  const auth = useAuth();
 
-export const containerClassName =
-  'w-full h-screen flex items-center justify-center px-4';
+  const form = useForm({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      email: '',
+      password: ''
+    },
+  });
 
-function LoginForm() {
+  const handleLogin = (values) => {
+    const email = values.email;
+    const password = values.password;
+    const token = login(email, password);
+    auth.setToken(token);
+    navigate('/profile');
+  };
+
   return (
-    <Card className="mx-auto max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl">Kirjaudu sisään</CardTitle>
-        <CardDescription>
-          Anna sähköpostiosoitteesi ja salasanasi
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleLogin)}>
         <div className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email">Sähköposti</Label>
-            <Input id="email" type="email" required />
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="email">Sähköposti</FormLabel>
+                  <FormControl>
+                    <Input type="email" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
           <div className="grid gap-2">
-            <div className="flex items-center">
-              <Label htmlFor="password">Salasana</Label>
-              <Link to="#" className="ml-auto inline-block text-sm underline">
-                Unohditko salasanasi?
-              </Link>
-            </div>
-            <Input id="password" type="password" required />
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-center">
+                    <FormLabel htmlFor="password">Salasana</FormLabel>
+                    <Link
+                      to="#"
+                      className="ml-auto inline-block text-sm underline"
+                    >
+                      Unohditko salasanasi?
+                    </Link>
+                  </div>
+                  <FormControl>
+                    <Input type="password" autoComplete="on" {...field} />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
           <Button type="submit" className="w-full">
             Kirjaudu sisään
@@ -53,9 +92,9 @@ function LoginForm() {
             Rekisteröidy
           </Link>
         </div>
-      </CardContent>
-    </Card>
+      </form>
+    </Form>
   );
-}
+};
 
 export default LoginForm;
