@@ -10,6 +10,7 @@ import Logout from '@pages/Logout';
 import Register from '@/pages/Register';
 import RootLayout from '@/pages/RootLayout';
 import ErrorPage from '@pages/ErrorPage';
+import Profile from '@pages/Profile';
 
 const Routes = () => {
   const { token } = useAuth();
@@ -27,7 +28,7 @@ const Routes = () => {
         },
         {
           path: '/profile',
-          element: <div>User Profile</div>,
+          element: <Profile />,
         },
         {
           path: '/logout',
