@@ -1,2 +1,5 @@
-/target/
+target/
 .env
+config/Default.yaml
+!config/Default.example.yaml
+routes.test.rest
