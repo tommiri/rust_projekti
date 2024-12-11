@@ -1,0 +1,14 @@
+database:
+  url: "<DATABASE_URL>"
+jwt:
+  secret: "<JWT_SECRET>"
+  expiration_hours: 24
+server:
+  port: 8000
+  address: "127.0.0.1"
+smtp:
+  host: "smtp.gmail.com"
+  port: 587
+  username: "<SMTP_USERNAME>"
+  password: "<SMTP_PASSWORD>"
+  from_email: "<SMTP_FROM>"
