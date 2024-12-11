@@ -1,41 +1,25 @@
 CREATE TABLE IF NOT EXISTS `users` (
-  `id` VARCHAR(255) NOT NULL UNIQUE,
-  -- UUID
+  `id` BINARY(16) NOT NULL DEFAULT (UUID_TO_BIN(UUID())),
   `email` VARCHAR(255) NOT NULL UNIQUE,
-  `first_name` VARCHAR(255),
-  `last_name` VARCHAR(255),
+  `first_name` VARCHAR(100),
+  `last_name` VARCHAR(100),
   `password_hash` VARCHAR(255) NOT NULL,
-  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY(`id`)
-) ENGINE = InnoDB DEFAULT CHARSET = latin1;
+  `email_verified` BOOLEAN NOT NULL DEFAULT FALSE,
+  `verification_token` VARCHAR(255),
+  `verification_expires` TIMESTAMP,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY(`id`),
+  INDEX `email_idx` (`email`),
+  INDEX `name_idx` (`last_name`, `first_name`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `emails` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `user` VARCHAR(255) NOT NULL,
+  `user` BINARY(16) NOT NULL,
   `email` VARCHAR(255) NOT NULL UNIQUE,
-  `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY(`id`),
   FOREIGN KEY(`user`) REFERENCES `users`(`id`) ON DELETE CASCADE
-) ENGINE = InnoDB DEFAULT CHARSET = latin1;
-
-INSERT INTO
-  `users` (`id`, `email`, `password`)
-VALUES
-  (1, 'db@user.com', 'test');
-
-INSERT INTO
-  `emails` (`user`, `email`)
-VALUES
-  (
-    (
-      SELECT
-        `id`
-      FROM
-        `users`
-      WHERE
-        `email` = 'db@user.com'
-    ),
-    'db@test.com'
-  );
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
