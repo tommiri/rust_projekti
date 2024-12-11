@@ -1,25 +1,43 @@
 #[macro_use]
 extern crate rocket;
 
+mod api;
 mod db;
-mod jwt;
 mod models;
-mod routes;
-mod schema;
+mod services;
+mod utils;
 
 use crate::db::init_pool;
-use dotenvy::dotenv;
-use std::env;
+use crate::utils::config::Settings;
+use rocket::config::Config as RocketConfig;
 
 #[launch]
 fn rocket() -> _ {
-    dotenv().ok();
+    // Load settings
+    let settings = Settings::new().expect("Failed to load settings");
 
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let db_pool = init_pool(&database_url);
+    // Initialize database pool
+    let db_pool = init_pool(&settings.database.url);
 
-    rocket::build().manage(db_pool).mount(
-        "/",
-        routes![routes::register, routes::login, routes::protected],
-    )
+    // Configure Rocket - use references to avoid moves
+    let config = RocketConfig::figment()
+        .merge(("port", settings.server.port))
+        .merge(("address", settings.server.address.as_str()));
+
+    rocket::custom(config)
+        .manage(db_pool)
+        .manage(settings)
+        .mount(
+            "/",
+            routes![api::register, api::login, api::verify_email, api::protected],
+        )
+        .register(
+            "/",
+            catchers![
+                api::unauthorized,
+                api::not_found,
+                api::internal_error,
+                api::default_catcher
+            ],
+        )
 }
