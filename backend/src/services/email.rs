@@ -44,7 +44,7 @@ impl EmailService {
     }
 
     pub async fn send_verification_email(&self, to: &str, token: &str) -> Result<()> {
-        let verify_url = format!("{}/verify/{}", self.base_url, token);
+        let verify_url = format!("{}/api/verify/{}", self.base_url, token);
 
         let body = self.templates.render(
             "verification",
