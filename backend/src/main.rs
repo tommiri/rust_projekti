@@ -28,8 +28,8 @@ fn rocket() -> _ {
         .manage(db_pool)
         .manage(settings)
         .mount(
-            "/",
-            routes![api::register, api::login, api::verify_email, api::protected],
+            "/api",
+            routes![api::health::health, api::register, api::login, api::verify_email, api::protected],
         )
         .register(
             "/",

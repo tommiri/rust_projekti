@@ -23,3 +23,20 @@ CREATE TABLE IF NOT EXISTS `emails` (
   PRIMARY KEY(`id`),
   FOREIGN KEY(`user`) REFERENCES `users`(`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
+-- Insert a test user
+INSERT INTO `users`
+  (
+   `email`,
+   `first_name`,
+   `last_name`,
+   `password_hash`,
+   `email_verified`
+  )
+VALUES
+  (
+  'test@example.com',
+  'Test',
+  'User',
+  '$2b$12$eBClFbWENPAU1K3z5PjGaecb4pp1K70wFffjwGlVawLQuhpEv5sLy',
+   TRUE);
