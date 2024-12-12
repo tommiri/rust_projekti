@@ -5,8 +5,6 @@ services:
       target: final
     ports:
       - 8000:8000
-    env_file:
-      - ./backend/.env
     depends_on:
       - db
     restart: always

@@ -17,7 +17,6 @@ RUN --mount=type=bind,source=src,target=src \
     --mount=type=bind,source=/src/db/migrations,target=migrations \
     --mount=type=bind,source=/templates,target=templates \
     set -eux; \
-    cargo check --locked; \
     cargo build --locked --release; \
     cp ./target/release/$pkg /main
 
@@ -33,7 +32,7 @@ COPY --from=build /main ./
 COPY /config ./config
 
 # Install the MySQL client.
-RUN apt-get update && apt-get install -y libmariadb-dev
+RUN apt-get update && apt-get install -y libmariadb-dev ca-certificates
 
 # What the container should run when it is started.
 CMD ./main
