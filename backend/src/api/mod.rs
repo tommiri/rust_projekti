@@ -7,3 +7,4 @@ pub use auth::{login, protected, register, verify_email};
 pub use catchers::*;
 // pub use emails::*;
 // pub use users::*;
+pub use health::*;
