@@ -34,10 +34,10 @@ const LoginForm = () => {
     },
   });
 
-  const handleLogin = (values) => {
+  const handleLogin = async (values) => {
     const email = values.email;
     const password = values.password;
-    const token = login(email, password);
+    const token = await login(email, password);
     auth.setToken(token);
     navigate('/profile');
   };

@@ -9,6 +9,7 @@ mod utils;
 
 use crate::db::init_pool;
 use crate::utils::config::Settings;
+use crate::utils::cors::cors_fairing;
 use rocket::config::Config as RocketConfig;
 
 #[launch]
@@ -27,9 +28,16 @@ fn rocket() -> _ {
     rocket::custom(config)
         .manage(db_pool)
         .manage(settings)
+        .attach(cors_fairing())
         .mount(
             "/api",
-            routes![api::health::health, api::register, api::login, api::verify_email, api::protected],
+            routes![
+                api::health,
+                api::options,
+                api::register,
+                api::login,
+                api::verify_email,
+                api::protected],
         )
         .register(
             "/",
