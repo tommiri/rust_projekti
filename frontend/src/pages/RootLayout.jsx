@@ -1,7 +1,7 @@
 import SiteHeader from '@components/Header';
 import { Outlet } from 'react-router-dom';
 
-function RootLayout() {
+const RootLayout = () => {
   return (
     <>
       <div className="mb-8">
@@ -12,6 +12,6 @@ function RootLayout() {
       <Outlet />
     </>
   );
-}
+};
 
 export default RootLayout;

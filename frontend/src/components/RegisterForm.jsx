@@ -38,14 +38,13 @@ const RegisterForm = () => {
     },
   });
 
-  const handleRegister = (values) => {
+  const handleRegister = async (values) => {
     const firstName = values.firstName;
     const lastName = values.lastName;
     const email = values.email;
     const password = values.password;
-    const token = register(firstName, lastName, email, password);
-    auth.setToken(token);
-    navigate('/profile');
+    const data = await register(firstName, lastName, email, password);
+    navigate(`/confirm/${encodeURIComponent(email)}`);
   };
 
   return (

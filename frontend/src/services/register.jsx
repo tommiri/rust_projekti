@@ -1,10 +1,11 @@
-const register = (email, first_name, last_name, password) => {
-  console.log('register data');
-  console.log('email', email);
-  console.log('first name', first_name);
-  console.log('last name', last_name);
-  console.log('password', password);
-  return 'register_token';
+import axios from 'axios';
+
+const register = async (first_name, last_name, email, password) => {
+  const response = await axios.post('http://localhost:8000/api/register', {
+    email: email,
+    password: password,
+  });
+  return response;
 };
 
 export default register;

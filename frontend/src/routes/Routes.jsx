@@ -5,12 +5,14 @@ import {
 } from 'react-router-dom';
 import { useAuth } from '@/providers/authProvider';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
+import { GuestRoute } from './GuestRoute';
 import Login from '@pages/Login';
 import Logout from '@pages/Logout';
 import Register from '@/pages/Register';
-import RootLayout from '@/pages/RootLayout';
 import ErrorPage from '@pages/ErrorPage';
 import Profile from '@pages/Profile';
+import ConfirmEmail from '@pages/ConfirmEmail';
+import ConfirmedEmail from '@pages/ConfirmedEmail';
 
 const Routes = () => {
   const { token } = useAuth();
@@ -20,7 +22,6 @@ const Routes = () => {
     {
       path: '/',
       element: <ProtectedRoute />, // Wrap the component in ProtectedRoute
-      errorElement: <ErrorPage />,
       children: [
         {
           index: true,
@@ -34,6 +35,10 @@ const Routes = () => {
           path: '/logout',
           element: <Logout />,
         },
+        {
+          path: '*',
+          element: <ErrorPage />,
+        },
       ],
     },
   ];
@@ -42,8 +47,7 @@ const Routes = () => {
   const routesForNotAuthenticatedOnly = [
     {
       path: '/',
-      element: <RootLayout />, // Wrap the component in ProtectedRoute
-      errorElement: <ErrorPage />,
+      element: <GuestRoute />, // Wrap the component in ProtectedRoute
       children: [
         {
           index: true,
@@ -56,6 +60,12 @@ const Routes = () => {
         {
           path: '/register',
           element: <Register />,
+        },
+        { path: 'confirm/:email', element: <ConfirmEmail /> },
+        { path: 'confirmed', element: <ConfirmedEmail /> },
+        {
+          path: '*',
+          element: <ErrorPage />,
         },
       ],
     },
