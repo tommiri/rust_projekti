@@ -61,10 +61,12 @@ impl EmailService {
             .body(body)
             .map_err(|e| AppError::EmailError(e))?;
 
+        println!("Email created");
         self.smtp
             .send(email)
             .await
             .map_err(|e| AppError::SmtpError(e))?;
+        println!("Email sent");
         Ok(())
     }
 }

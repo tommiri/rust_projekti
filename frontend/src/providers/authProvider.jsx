@@ -1,12 +1,5 @@
 import axios from 'axios';
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 // Authentication context to provide the authentication token
 const AuthContext = createContext();
@@ -16,7 +9,7 @@ let logoutTimer;
 // the authentication token, a function to set the token and logout function.
 const AuthProvider = ({ children }) => {
   // State to hold the authentication token
-  const [token, setToken_] = useState();
+  const [token, setToken_] = useState(localStorage.getItem("token"));
   const [tokenExpirationDate, setTokenExpirationDate] = useState(null);
 
   // Function to set the authentication token
@@ -33,9 +26,11 @@ const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common['Authorization'] = 'Bearer ' + token;
+      localStorage.setItem('token',token);
       setTokenExpirationDate(new Date(new Date().getTime() + 3600 * 1000));
     } else {
       delete axios.defaults.headers.common['Authorization'];
+      localStorage.removeItem('token')
       setTokenExpirationDate(null);
     }
   }, [token]);

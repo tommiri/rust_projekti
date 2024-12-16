@@ -30,15 +30,15 @@ const LoginForm = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       email: '',
-      password: ''
+      password: '',
     },
   });
 
   const handleLogin = async (values) => {
     const email = values.email;
     const password = values.password;
-    const token = await login(email, password);
-    auth.setToken(token);
+    const data = await login(email, password);
+    auth.setToken(data.data);
     navigate('/profile');
   };
 

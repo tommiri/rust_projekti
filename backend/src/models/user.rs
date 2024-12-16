@@ -18,7 +18,7 @@ pub struct User {
     pub updated_at: NaiveDateTime,
 }
 
-#[derive(Insertable)]
+#[derive(Debug, Insertable)]
 #[diesel(table_name = users)]
 pub struct NewUser<'a> {
     pub email: &'a str,
