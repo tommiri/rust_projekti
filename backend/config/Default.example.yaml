@@ -6,7 +6,7 @@ jwt:
 server:
   port: 8000
   address: "127.0.0.1"
-  base_url: "http://localhost:8000"
+  base_url: "http://localhost:5173"
 
 smtp:
   host: "smtp.gmail.com"

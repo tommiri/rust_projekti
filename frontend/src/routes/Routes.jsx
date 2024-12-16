@@ -11,8 +11,8 @@ import Logout from '@pages/Logout';
 import Register from '@/pages/Register';
 import ErrorPage from '@pages/ErrorPage';
 import Profile from '@pages/Profile';
-import ConfirmEmail from '@pages/ConfirmEmail';
-import ConfirmedEmail from '@pages/ConfirmedEmail';
+import VerifyEmail from '@/pages/VerifyEmail';
+import VerifiedEmail from '@/pages/VerifiedEmail';
 
 const Routes = () => {
   const { token } = useAuth();
@@ -61,8 +61,8 @@ const Routes = () => {
           path: '/register',
           element: <Register />,
         },
-        { path: 'confirm/:email', element: <ConfirmEmail /> },
-        { path: 'confirmed', element: <ConfirmedEmail /> },
+        { path: 'verify/:email', element: <VerifyEmail /> },
+        { path: 'verified/:token', element: <VerifiedEmail /> },
         {
           path: '*',
           element: <ErrorPage />,

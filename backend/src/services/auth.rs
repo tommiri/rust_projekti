@@ -57,8 +57,6 @@ impl AuthService {
             verification_expires: Some(expires),
         };
 
-        println!("{:?}", new_user);
-
         diesel::insert_into(dsl::users)
             .values(&new_user)
             .execute(&mut conn)
@@ -70,12 +68,10 @@ impl AuthService {
                 _ => AppError::DatabaseError(e),
             })?;
 
-        println!("User added to database");
         // Send verification email
         self.email_service
             .send_verification_email(email, &verification_token)
             .await?;
-        println!("User registered");
         Ok(())
     }
 

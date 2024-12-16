@@ -44,7 +44,7 @@ const RegisterForm = () => {
     const email = values.email;
     const password = values.password;
     const data = await register(firstName, lastName, email, password);
-    navigate(`/confirm/${encodeURIComponent(email)}`);
+    navigate(`/verify/${encodeURIComponent(email)}`);
   };
 
   return (
