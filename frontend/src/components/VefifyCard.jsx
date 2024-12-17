@@ -1,15 +1,8 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-
 const VerifyEmailCard = () => {
-
   const navigate = useNavigate();
   const { email } = useParams();
   return (

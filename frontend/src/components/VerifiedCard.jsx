@@ -9,27 +9,16 @@ const VerifiedEmailCard = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const { token } = useParams();
-  const [verificationStatus, setVerificationStatus] = useState({
-    success: false,
-    message: 'Vahvistetaan sähköpostia...',
-  });
+  const [verificationStatus, setVerificationStatus] = useState(false);
 
   useEffect(() => {
     const verifyEmailHandler = async () => {
+      setIsLoading(true);
       try {
-        console.log('Verifyemailhandler');
-        const response = await verifyEmail(token);
-        console.log('Repsonse got');
-
-        setVerificationStatus({
-          success: true,
-        });
+        await verifyEmail(token);
+        setVerificationStatus(true);
       } catch (error) {
-        console.log('Error in verifyEmailHandler', error);
-        setVerificationStatus({
-          success: false,
-          message: 'Sähköpostin vahvistaminen epäonnistui.',
-        });
+        setVerificationStatus(false);
       } finally {
         setIsLoading(false);
       }
@@ -65,7 +54,7 @@ const VerifiedEmailCard = () => {
               </>
             ) : (
               <>
-                <p>{verificationStatus.message}</p>
+                <p>Sähköpostiosoitteen vahvistamisessa tapahtui virhe</p>
                 <p className="mt-2">Yritä rekisteröityä uudelleen.</p>
                 <div className="mt-4">
                   <Button
