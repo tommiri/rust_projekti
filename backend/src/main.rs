@@ -1,12 +1,51 @@
 #[macro_use]
 extern crate rocket;
 
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
-}
+mod api;
+mod db;
+mod models;
+mod services;
+mod utils;
+
+use crate::db::init_pool;
+use crate::utils::config::Settings;
+use crate::utils::cors::cors_fairing;
+use rocket::config::Config as RocketConfig;
 
 #[launch]
 fn rocket() -> _ {
-    rocket::build().mount("/", routes![index])
+    // Load settings
+    let settings = Settings::new().expect("Failed to load settings");
+
+    // Initialize database pool
+    let db_pool = init_pool(&settings.database.url);
+
+    // Configure Rocket - use references to avoid moves
+    let config = RocketConfig::figment()
+        .merge(("port", settings.server.port))
+        .merge(("address", settings.server.address.as_str()));
+
+    rocket::custom(config)
+        .manage(db_pool)
+        .manage(settings)
+        .attach(cors_fairing())
+        .mount(
+            "/api",
+            routes![
+                api::health,
+                api::options,
+                api::register,
+                api::login,
+                api::verify_email,
+                api::protected],
+        )
+        .register(
+            "/",
+            catchers![
+                api::unauthorized,
+                api::not_found,
+                api::internal_error,
+                api::default_catcher
+            ],
+        )
 }
