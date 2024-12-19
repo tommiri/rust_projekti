@@ -1,5 +1,11 @@
+use crate::services::validate_jwt;
+use crate::db::DbPool;
+use crate::db::schema::{users::dsl as udsl, emails::dsl as edsl};
 use crate::utils::config::Settings;
 use crate::utils::errors::{AppError, Result};
+use crate::models::{NewEmail, Email, User};
+use crate::db::schema::users;
+use crate::db::schema::emails;
 use handlebars::Handlebars;
 use lettre::message::header;
 use lettre::transport::smtp::authentication::Credentials;
@@ -8,6 +14,10 @@ use lettre::AsyncTransport;
 use lettre::Message;
 use lettre::Tokio1Executor;
 use serde_json::json;
+use chrono::{Duration, NaiveDateTime, Utc};
+use diesel::result::DatabaseErrorKind;
+use diesel::prelude::*;
+use diesel::QueryDsl;
 
 pub struct EmailService {
     smtp: AsyncSmtpTransport<Tokio1Executor>,
@@ -68,4 +78,65 @@ impl EmailService {
 
         Ok(())
     }
+}
+
+// Service for handling email reservation database operations
+pub struct EmailRepositoryService {
+    pool: DbPool,
+    settings: Settings
+}
+
+impl EmailRepositoryService {
+
+    pub fn new(pool: DbPool, settings: Settings) -> Result<Self> {
+        Ok(Self {
+            pool,
+            settings
+        })
+    }
+
+    pub fn reserve_email(&self, token: &str, email: &str) -> Result<()> {
+
+        let decoded_claims = validate_jwt(token, &self.settings)?;
+
+        let mut conn = self.pool.get().map_err(|_| AppError::InternalServerError)?;
+
+        // Find user with valid non-expired token
+        let user = udsl::users
+            .filter(udsl::verification_token.eq(Some(token)))
+            .filter(udsl::verification_expires.gt(Some(Utc::now().naive_utc())))
+            .first::<User>(&mut conn)?;
+
+
+        // Check if email is already taken
+        let existing_email = emails::table
+            .filter(emails::email.eq(email)) // Use email directly as &str
+            .first::<Email>(&mut conn)
+            .optional()?;
+
+        if existing_email.is_some() {
+            return Err(AppError::EmailTaken);
+        }
+
+        // Create new email reservation
+        let new_email = NewEmail {
+            user: user.id,
+            email,
+        };
+
+        diesel::insert_into(edsl::emails)
+            .values(&new_email)
+            .execute(&mut conn)
+            .map_err(|e| match e {
+                diesel::result::Error::DatabaseError(
+                    DatabaseErrorKind::UniqueViolation,
+                     _
+                ) => AppError::EmailTaken,
+                _ => AppError::DatabaseError(e),
+            })?;
+
+        // Fetch and return the newly inserted email
+        Ok(())
+    }
+
 }

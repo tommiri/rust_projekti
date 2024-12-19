@@ -1,6 +1,5 @@
-use serde::Serialize;
-use rocket::{get, Response, serde::json::Json, Request, response::Responder};
-use rocket::http::{Header, Status};
+use rocket::{get, serde::json::Json};
+use rocket::http::Status;
 
 
 #[get("/health")]

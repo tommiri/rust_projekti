@@ -6,6 +6,6 @@ pub mod status; // Health check route
 
 pub use auth::{login, protected, register, verify_email};
 pub use catchers::*;
-// pub use emails::*;
+pub use emails::reserve_email;
 // pub use users::*;
 pub use status::*;
