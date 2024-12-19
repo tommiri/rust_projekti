@@ -1,57 +1,123 @@
-import { Link } from 'react-router-dom';
-
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+const updateEmail = async (email) => {
+  const response = await fetch('http://localhost:8000/email', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  return response;
+};
+
+const updatePassword = async (password) => {
+  const response = await fetch('http://localhost:8000/password', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  });
+  return response;
+};
+
 function ProfileForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      await updateEmail(email);
+      setEmail('');
+      setSuccessMessage('Email updated successfully!');
+    } catch (err) {
+      setError('Failed to update email.');
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (password !== confirmPassword) {
+      setError('Passwords do not match!');
+      return;
+    }
+    try {
+      await updatePassword(password);
+      setPassword('');
+      setConfirmPassword('');
+      setSuccessMessage('Password updated successfully!');
+    } catch (err) {
+      setError('Failed to update password.');
+    }
+  };
+
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
-        <CardTitle className="text-2xl">Vaihda sähköpostiosoite</CardTitle>
-        <CardDescription>
-          Anna uusi sähköpostiosoitteesi
-        </CardDescription>
+        <CardTitle className="text-2xl">Change Email</CardTitle>
+        <CardDescription>Enter your new email address</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Sähköposti</Label>
-            <Input id="email" type="email" />
+        <form onSubmit={handleEmailSubmit}>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                required
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Update
+            </Button>
           </div>
-          <Button type="submit" className="w-full">
-            Vaihda
-          </Button>
-        </div>
+        </form>
       </CardContent>
 
       <CardHeader>
-        <CardTitle className="text-2xl">Vaihda salasana</CardTitle>
-        <CardDescription>
-          Anna uusi salasana
-        </CardDescription>
+        <CardTitle className="text-2xl">Change Password</CardTitle>
+        <CardDescription>Enter your new password</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="password">Salasana</Label>
-            <Input id="passwond" type="password" />
+        <form onSubmit={handlePasswordSubmit}>
+          <div className="grid gap-4">
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                required
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={confirmPassword}
+                required
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Update
+            </Button>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Salasana uudestaan</Label>
-            <Input id="passwond" type="password" />
-          </div>
-          <Button type="submit" className="w-full">
-            Vaihda
-          </Button>
-        </div>
+        </form>
+      </CardContent>
+      <CardContent>
+        {error && <div className="text-red-500">{error}</div>}
+        {successMessage && <div className="text-green-500">{successMessage}</div>}
       </CardContent>
     </Card>
   );
