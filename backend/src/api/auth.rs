@@ -8,13 +8,14 @@ use rocket::request::{FromRequest, Outcome};
 use rocket::{get, http::Status, post, serde::json::Json, Request};
 use serde::Deserialize;
 
+
 #[derive(Deserialize)]
 pub struct AuthRequest {
     pub email: String,
     pub password: String,
 }
 
-pub struct Token(String);
+pub struct Token(pub String);
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Token {

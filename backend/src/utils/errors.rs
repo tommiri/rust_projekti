@@ -27,6 +27,15 @@ pub enum AppError {
     #[error("Email taken")]
     EmailTaken,
 
+    #[error("Email already reserved")]
+    EmailAlreadyReserved,
+
+    #[error("No email reservation found")]
+    NoReservation,
+
+    #[error("Invalid email prefix")]
+    InvalidEmailPrefix,
+
     #[error("SMTP error: {0}")]
     SmtpError(lettre::transport::smtp::Error),
 
@@ -83,6 +92,9 @@ impl From<AppError> for Status {
             AppError::DatabaseError(_) => Status::InternalServerError,
             AppError::InvalidToken(_) => Status::Unauthorized,
             AppError::EmailTaken => Status::Conflict,
+            AppError::EmailAlreadyReserved => Status::Conflict,
+            AppError::NoReservation => Status::NotFound,
+            AppError::InvalidEmailPrefix => Status::BadRequest,
             AppError::PasswordHashError(_) => Status::InternalServerError,
             AppError::ConfigError(_) => Status::InternalServerError,
             AppError::InternalServerError => Status::InternalServerError,

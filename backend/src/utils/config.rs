@@ -29,11 +29,17 @@ pub struct SmtpSettings {
 }
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct EmailSettings {
+    pub domain: String,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct Settings {
     pub database: Database,
     pub jwt: Jwt,
     pub server: Server,
     pub smtp: SmtpSettings,
+    pub email: EmailSettings,
 }
 
 impl Settings {
