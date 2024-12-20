@@ -95,9 +95,7 @@ impl EmailRepositoryService {
         })
     }
 
-    pub fn reserve_email(&self, token: &str, email_to_reserve: &str) -> Result<()> {
-
-
+    pub fn get_email(&self, token: &str) -> Result<String> {
         let decoded_claims = validate_jwt(token, &self.settings)?;
         let user_email = &decoded_claims.sub;
 
@@ -105,22 +103,46 @@ impl EmailRepositoryService {
 
         // Find user by their email from JWT claims
         let user = udsl::users
-            .filter(udsl::email.eq(user_email)) // Find user by their login email
+            .filter(udsl::email.eq(user_email))
             .first::<User>(&mut conn)?;
 
-        // Check if user already has a reserved email
-        let user_existing_reservation = edsl::emails
+        // Get user's reserved email
+        let email = edsl::emails
             .filter(edsl::user.eq(&user.id))
+            .first::<Email>(&mut conn)
+            .optional()?
+            .ok_or(AppError::NoReservation)?;
+
+        Ok(email.email.to_string())
+    }
+
+    pub fn reserve_email(&self, token: &str, email_prefix: &str) -> Result<String> {
+        let decoded_claims = validate_jwt(token, &self.settings)?;
+        let user_email = &decoded_claims.sub;
+        let mut conn = self.pool.get().map_err(|_| AppError::InternalServerError)?;
+
+        let user = udsl::users
+            .filter(udsl::email.eq(user_email))
+            .first::<User>(&mut conn)?;
+
+        let user_id = user.id.clone();
+
+        // Check existing reservation
+        let user_existing_reservation = edsl::emails
+            .filter(edsl::user.eq(&user_id))
             .first::<Email>(&mut conn)
             .optional()?;
 
         if user_existing_reservation.is_some() {
-            return Err(AppError::EmailTaken);
+            return Err(AppError::EmailAlreadyReserved);
         }
 
-        // Check if email is already taken
+        // Format full email
+        let full_email = format!("{}@{}", email_prefix, self.settings.email.domain);
+
+        // Check if email is taken
         let existing_email = edsl::emails
-            .filter(edsl::email.eq(user_email)) // Use email directly as &str
+            .filter(edsl::email.eq(&full_email))
             .first::<Email>(&mut conn)
             .optional()?;
 
@@ -130,24 +152,23 @@ impl EmailRepositoryService {
 
         // Create new email reservation
         let new_email = NewEmail {
-            user: user.id,
-            email: email_to_reserve,
+            user: user_id,
+            email: &full_email,
         };
 
         diesel::insert_into(edsl::emails)
             .values(&new_email)
             .execute(&mut conn)
             .map_err(|e| match e {
-                diesel::result::Error::DatabaseError(
-                    DatabaseErrorKind::UniqueViolation,
-                     _
-                ) => AppError::EmailTaken,
+                diesel::result::Error::DatabaseError(DatabaseErrorKind::UniqueViolation, _) => {
+                    AppError::EmailTaken
+                }
                 _ => AppError::DatabaseError(e),
             })?;
 
-        // Fetch and return the newly inserted email
-        Ok(())
+        Ok(full_email)
     }
+
     pub fn delete_reserved_email(&self, token: &str) -> Result<()> {
         let decoded_claims = validate_jwt(token, &self.settings)?;
         let user_email = &decoded_claims.sub;
@@ -175,7 +196,6 @@ impl EmailRepositoryService {
 
         Ok(())
     }
-
 
     pub fn get_domain(&self, token: &str) -> Result<String> {
         let _decoded_claims = validate_jwt(token, &self.settings)?;

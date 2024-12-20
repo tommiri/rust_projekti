@@ -3,12 +3,32 @@ use crate::db::DbPool;
 use crate::services::EmailRepositoryService;
 use crate::utils::config::Settings;
 use crate::api::auth::Token;
-use rocket::{http::Status, post, serde::json::Json, request::{FromRequest, Request, Outcome}};
+use rocket::{http::Status, post, request::{FromRequest, Request, Outcome}};
 use serde::Deserialize;
+use rocket::serde::json::{Json, Value, json};
+
 
 #[derive(Deserialize)]
 pub struct EmailReservationRequest {
     pub email: String,
+}
+
+#[get("/email")]
+pub async fn get_email(
+    db: &rocket::State<DbPool>,
+    settings: &rocket::State<Settings>,
+    token: Token,
+) -> Result<Json<String>, Status> {
+    let service = EmailRepositoryService::new(db.inner().clone(), settings.inner().clone())
+        .map_err(|_| Status::InternalServerError)?;
+
+    match service.get_email(&token.0) {
+        Ok(email) => Ok(Json(email)),
+        Err(e) => {
+            println!("Email fetching error: {}", e);
+            Err(e.into())
+        }
+    }
 }
 
 #[post("/email", data = "<request>")]
@@ -17,19 +37,22 @@ pub async fn reserve_email(
     db: &rocket::State<DbPool>,
     settings: &rocket::State<Settings>,
     token: Token,
-) -> Result<Json<String>, Status> {
-
+) -> Result<Json<Value>, Status> {  // Changed return type to Json<Value>
     let service = EmailRepositoryService::new(db.inner().clone(), settings.inner().clone())
         .map_err(|_| Status::InternalServerError)?;
 
     match service.reserve_email(&token.0, &request.email) {
-        Ok(_) => Ok(Json("Email reserved successfully".to_string())),
+        Ok(email) => Ok(Json(json!({
+            "email": email,
+            "message": "Email reserved successfully"
+        }))),
         Err(e) => {
             println!("Email reserving error: {}", e);
             Err(e.into())
         }
     }
 }
+
 #[delete("/email")]
 pub async fn delete_email(
     db: &rocket::State<DbPool>,
@@ -47,7 +70,6 @@ pub async fn delete_email(
         }
     }
 }
-
 
 #[get("/domain")]
 pub async fn get_domain(

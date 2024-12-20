@@ -39,6 +39,7 @@ fn rocket() -> _ {
                 api::register,
                 api::login,
                 api::verify_email,
+                api::get_email,
                 api::reserve_email,
                 api::delete_email,
                 api::protected,
