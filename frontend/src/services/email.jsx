@@ -21,7 +21,7 @@ export const reserveEmail = async (email) => {
 
 export const deleteEmail = async () => {
   const response = await axios.delete(
-    `${import.meta.env.VITE_API_URL}/api/delete/`
+    `${import.meta.env.VITE_API_URL}/api/email/`
   );
   return response;
 }

@@ -1,33 +1,87 @@
 import { useState, useEffect } from 'react';
+import { set, useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  Form,
+  FormField,
+  FormControl,
+  FormLabel,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { LoadingSpinner } from './LoadingSpinner';
 import { reserveEmail, deleteEmail, getDomain } from '@/services/email';
 
-const EmailReservation = () => {
-  const [email, setEmail] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [reserveState, reserveAction] = useState();
-  const [deleteState, deleteAction] = useState();
-  const domain = getDomain();
+const FormSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Sähköpostin alkuosa on pakollinen')
+    .max(64, 'Sähköpostin alkuosa saa olla enintään 64 merkkiä')
+    .regex(
+      /^[a-zA-Z0-9!#$%&'*+\-/=?^_`.{|}~]+(?:\.[a-zA-Z0-9!#$%&'*+\-/=?^_`.{|}~]+)*$/,
+      'Sähköpostin alkuosa sisältää virheellisiä merkkejä'
+    )
+    .refine(
+      (value) => !value.startsWith('.'),
+      'Sähköpostin alkuosa ei voi alkaa pisteellä'
+    )
+    .refine(
+      (value) => !value.endsWith('.'),
+      'Sähköpostin alkuosa ei voi päättyä pisteeseen'
+    )
+    .refine(
+      (value) => !value.includes('..'),
+      'Sähköpostin alkuosa ei voi sisältää peräkkäisiä pisteitä'
+    ),
+});
 
-  const reserveEmailHandler = async (email) => {
+const EmailReservation = () => {
+  const [email, setEmail] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [reserveState, setReserveState] = useState();
+  const [deleteState, setDeleteState] = useState();
+  const [domain, setDomain] = useState('');
+
+  const form = useForm({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      email: '',
+    },
+  });
+
+  useEffect(() => {
+    const fetchDomain = async () => {
+      const response = await getDomain();
+      console.log('Domain', response.data);
+      setDomain(response.data);
+    };
+    fetchDomain();
+  }, []);
+
+  const reserveEmailHandler = async (values) => {
     setLoading(true);
     try {
-      await reserveEmail(email);
-      reserveAction({
+      const email_to_reserve = values.email;
+      await reserveEmail(email_to_reserve);
+      setReserveState({
         success: true,
         message: 'Varaus onnistui',
       });
+
+      setEmail(email_to_reserve + '@' + domain);
+      console.log('Email reserved', email);
     } catch (error) {
-      reserveAction({
+      setReserveState({
         success: false,
         message: 'Varaaminen epäonnistui',
       });
     } finally {
+      setDeleteState(null);
       setLoading(false);
     }
   };
@@ -36,26 +90,21 @@ const EmailReservation = () => {
     setLoading(true);
     try {
       await deleteEmail();
-      deleteAction({
+      setDeleteState({
         success: true,
         message: 'Sähköposti poistettu',
       });
+      setEmail(null);
     } catch (error) {
-      deleteAction({
+      setDeleteState({
         success: false,
         message: 'Poistaminen epäonnistui',
       });
     } finally {
+      setReserveState(null);
       setLoading(false);
     }
   };
-
-  /*
-  {
-    success: true,
-    message: 'Varaus onnistui',
-  }
-    */
 
   if (loading) {
     return <LoadingSpinner />;
@@ -98,25 +147,46 @@ const EmailReservation = () => {
           </div>
         </div>
       ) : (
-        <>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="email">Sähhköpostiosoite</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Anna sähköpostiosoite"
-                required
-                onChange={(e) => setEmail(e.target.value)}
-                value={email}
-              />
+        <Form {...form}>
+          <form
+            className="space-y-6"
+            onSubmit={form.handleSubmit(reserveEmailHandler)}
+          >
+            <div className="grid w-full items-center gap-4">
+              <div className="flex flex-col space-y-1.5">
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel htmlFor="email">
+                        Varaa sähköpostiosoite
+                      </FormLabel>
+
+                      <div className="flex items-center gap-2">
+                        <FormControl>
+                          <Input
+                            id="email"
+                            placeholder="Käyttäjänimi"
+                            className="rounded-r-none border-r-0"
+                            {...field}
+                          />
+                        </FormControl>
+                        <div className="flex h-10 items-center rounded-r-lg border bg-gray-50 px-3 font-medium text-gray-500">
+                          @{domain}
+                        </div>
+                      </div>
+                      <FormMessage className="mt-1 text-sm text-red-500" />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <Button type="submit" className="mt-4 w-full">
+                Varaa
+              </Button>
             </div>
-            <Button className="mt-4 w-full" onClick={reserveEmailHandler}>
-              Varaa sähköpostiosoite
-            </Button>
-          </div>
-        </>
+          </form>
+        </Form>
       )}
     </>
   );

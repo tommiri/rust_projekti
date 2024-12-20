@@ -38,6 +38,6 @@ VALUES
     'test@example.com',
     'Test',
     'User',
-    '$argon2id$v=19$m=19456,t=2,p=1$Xafb2ty3hkee61MQJ8TY3g$e88StT3jn5DIlXMktzRuaIzZwSEhNhLB7Ou1GRzlaO8',
+    '$argon2id$v=19$m=19456,t=2,p=1$fP9FN86U/KZYiy8t7a4Ylw$3daM1q7vSfwJTtool00B74++NeAiaXwypdKApSxR7QM',
     TRUE
   );
