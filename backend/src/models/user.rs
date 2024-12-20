@@ -8,8 +8,8 @@ use diesel::prelude::*;
 pub struct User {
     pub id: Vec<u8>, // BINARY(16) for UUID
     pub email: String,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
+    pub first_name: String,
+    pub last_name: String,
     pub password_hash: String,
     pub email_verified: bool,
     pub verification_token: Option<String>,
@@ -25,4 +25,6 @@ pub struct NewUser<'a> {
     pub password_hash: &'a str,
     pub verification_token: Option<&'a str>,
     pub verification_expires: Option<NaiveDateTime>,
+    pub first_name: &'a str,
+    pub last_name: &'a str,
 }

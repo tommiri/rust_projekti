@@ -6,6 +6,7 @@ mod db;
 mod models;
 mod services;
 mod utils;
+mod validation;
 
 use crate::db::init_pool;
 use crate::utils::config::Settings;
@@ -37,7 +38,8 @@ fn rocket() -> _ {
                 api::register,
                 api::login,
                 api::verify_email,
-                api::protected],
+                api::protected
+            ],
         )
         .register(
             "/",
