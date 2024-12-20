@@ -3,7 +3,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum AppError {
-    #[error("Authentication failed")]
+    #[error("Invalid email or password")]
     AuthenticationError,
 
     #[error("Database error: {0}")]
@@ -18,13 +18,13 @@ pub enum AppError {
     #[error("Configuration error: {0}")]
     ConfigError(#[from] config::ConfigError),
 
-    #[error("Email not verified")]
+    #[error("Please verify your email before logging in")]
     EmailNotVerified,
 
-    #[error("Verification expired")]
+    #[error("Email verification link has expired")]
     VerificationExpired,
 
-    #[error("Email taken")]
+    #[error("Email address is already in use")]
     EmailTaken,
 
     #[error("Email already reserved")]
@@ -39,7 +39,7 @@ pub enum AppError {
     #[error("SMTP error: {0}")]
     SmtpError(lettre::transport::smtp::Error),
 
-    #[error("Email error: {0}")]
+    #[error("Error sending verification email: {0}")]
     EmailError(lettre::error::Error),
 
     #[error("Render error: {0}")]

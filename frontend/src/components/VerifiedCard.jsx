@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { LoadingSpinner } from './LoadingSpinner';
-import verifyEmail from '@/services/verifyEmail';
+import { verifyEmail } from '@/services/email';
 
 const VerifiedEmailCard = () => {
   const navigate = useNavigate();

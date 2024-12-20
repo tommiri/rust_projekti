@@ -3,16 +3,44 @@ use crate::db::DbPool;
 use crate::services::AuthService;
 use crate::utils::config::Settings;
 use crate::utils::errors::AppError;
+use crate::validation::{LoginValidator, RegisterValidator};
 
 use rocket::request::{FromRequest, Outcome};
 use rocket::{get, http::Status, post, serde::json::Json, Request};
-use serde::Deserialize;
+use serde::Serialize;
+use validator::{Validate, ValidationErrors};
 
+#[derive(Debug, Serialize)]
+pub struct ValidationErrorResponse {
+    pub message: String,
+    pub errors: Vec<String>,
+}
 
-#[derive(Deserialize)]
-pub struct AuthRequest {
-    pub email: String,
-    pub password: String,
+impl From<ValidationErrors> for ValidationErrorResponse {
+    fn from(errors: ValidationErrors) -> Self {
+        let error_messages: Vec<String> = errors
+            .field_errors()
+            .values()
+            .flat_map(|errs| {
+                errs.iter()
+                    .map(|e| e.message.clone().unwrap_or_default().to_string())
+            })
+            .collect();
+
+        Self {
+            message: "Validation failed".to_string(),
+            errors: error_messages,
+        }
+    }
+}
+
+impl From<AppError> for ValidationErrorResponse {
+    fn from(error: AppError) -> Self {
+        Self {
+            message: error.to_string(),
+            errors: vec![error.to_string()],
+        }
+    }
 }
 
 pub struct Token(pub String);
@@ -37,34 +65,46 @@ impl<'r> FromRequest<'r> for Token {
 
 #[post("/register", data = "<auth>")]
 pub async fn register(
-    auth: Json<AuthRequest>,
+    auth: Json<RegisterValidator>,
     db: &rocket::State<DbPool>,
     settings: &rocket::State<Settings>,
-) -> Result<Json<String>, Status> {
-    let auth_service = AuthService::new(db.inner().clone(), settings.inner().clone())?;
-    match auth_service.register(&auth.email, &auth.password).await {
+) -> Result<Json<String>, Json<ValidationErrorResponse>> {
+    if let Err(errors) = auth.validate() {
+        return Err(Json(ValidationErrorResponse::from(errors)));
+    }
+
+    let auth_service = AuthService::new(db.inner().clone(), settings.inner().clone())
+        .map_err(|e| Json(ValidationErrorResponse::from(e)))?;
+    match auth_service
+        .register(
+            &auth.email,
+            &auth.password,
+            &auth.first_name,
+            &auth.last_name,
+        )
+        .await
+    {
         Ok(_) => Ok(Json("User registered successfully".to_string())),
-        Err(e) => {
-            error!("Registration error: {}", e);
-            Err(e.into())
-        }
+        Err(e) => Err(Json(ValidationErrorResponse::from(e))),
     }
 }
 
 #[post("/login", data = "<auth>")]
 pub async fn login(
-    auth: Json<AuthRequest>,
+    auth: Json<LoginValidator>,
     db: &rocket::State<DbPool>,
     settings: &rocket::State<Settings>,
-) -> Result<Json<String>, Status> {
-    let auth_service = AuthService::new(db.inner().clone(), settings.inner().clone())?;
+) -> Result<Json<String>, Json<ValidationErrorResponse>> {
+    if let Err(errors) = auth.validate() {
+        return Err(Json(ValidationErrorResponse::from(errors)));
+    }
+
+    let auth_service = AuthService::new(db.inner().clone(), settings.inner().clone())
+        .map_err(|e| Json(ValidationErrorResponse::from(e)))?;
     match auth_service.login(&auth.email, &auth.password).await {
         Ok(token) => Ok(Json(token)),
-        Err(e) => {
-            // Log error here
-            println!("Login error: {}", e);
-            Err(e.into())
-        }
+
+        Err(e) => Err(Json(ValidationErrorResponse::from(e))),
     }
 }
 

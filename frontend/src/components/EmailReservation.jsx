@@ -4,18 +4,62 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { LoadingSpinner } from './LoadingSpinner';
+import { reserveEmail, deleteEmail, getDomain } from '@/services/email';
 
 const EmailReservation = () => {
-  const [email, setEmail] = useState();
-  const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
   const [reserveState, reserveAction] = useState();
+  const [deleteState, deleteAction] = useState();
+  const domain = getDomain();
+
+  const reserveEmailHandler = async (email) => {
+    setLoading(true);
+    try {
+      await reserveEmail(email);
+      reserveAction({
+        success: true,
+        message: 'Varaus onnistui',
+      });
+    } catch (error) {
+      reserveAction({
+        success: false,
+        message: 'Varaaminen epäonnistui',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteEmailHandler = async () => {
+    setLoading(true);
+    try {
+      await deleteEmail();
+      deleteAction({
+        success: true,
+        message: 'Sähköposti poistettu',
+      });
+    } catch (error) {
+      deleteAction({
+        success: false,
+        message: 'Poistaminen epäonnistui',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /*
   {
     success: true,
     message: 'Varaus onnistui',
   }
     */
-  const [deleteState, deleteAction] = useState();
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <>
@@ -48,7 +92,7 @@ const EmailReservation = () => {
                 <strong>{email}</strong>
               </p>
             </div>
-            <Button type="submit" variant="destructive">
+            <Button variant="destructive" onClick={deleteEmailHandler}>
               Poista sähköposti
             </Button>
           </div>
@@ -64,12 +108,14 @@ const EmailReservation = () => {
                 type="email"
                 placeholder="Anna sähköpostiosoite"
                 required
+                onChange={(e) => setEmail(e.target.value)}
+                value={email}
               />
             </div>
+            <Button className="mt-4 w-full" onClick={reserveEmailHandler}>
+              Varaa sähköpostiosoite
+            </Button>
           </div>
-          <Button type="submit" className="mt-4 w-full">
-            Varaa sähköpostiosoite
-          </Button>
         </>
       )}
     </>

@@ -6,6 +6,7 @@ mod db;
 mod models;
 mod services;
 mod utils;
+mod validation;
 
 use crate::db::init_pool;
 use crate::utils::config::Settings;

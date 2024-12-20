@@ -62,8 +62,12 @@ const Routes = () => {
           path: '/register',
           element: <Register />,
         },
-        { path: 'verify/:email', element: <VerifyEmail /> },
-        { path: 'verified/:token', element: <VerifiedEmail /> },
+        { path: 'verify/:email',
+          element: <VerifyEmail />
+        },
+        { path: 'verified/:token',
+          element: <VerifiedEmail />
+        },
         {
           path: '*',
           element: <ErrorPage />,

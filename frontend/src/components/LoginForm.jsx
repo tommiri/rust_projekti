@@ -11,7 +11,7 @@ import {
   FormLabel,
   FormItem,
 } from '@/components/ui/form';
-import login from '@/services/login';
+import { login } from '@/services/auth';
 import { useAuth } from '@/providers/authProvider';
 
 const FormSchema = z.object({

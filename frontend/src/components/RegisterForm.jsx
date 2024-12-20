@@ -12,7 +12,7 @@ import {
   FormItem,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import register from '@/services/register';
+import { register } from '@/services/auth';
 import { LoadingSpinner } from './LoadingSpinner';
 
 const FormSchema = z.object({
