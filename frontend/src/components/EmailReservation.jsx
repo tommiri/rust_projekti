@@ -15,7 +15,12 @@ import {
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { LoadingSpinner } from './LoadingSpinner';
-import { reserveEmail, deleteEmail, getDomain } from '@/services/email';
+import {
+  getEmail,
+  reserveEmail,
+  deleteEmail,
+  getDomain,
+} from '@/services/email';
 
 const FormSchema = z.object({
   email: z
@@ -56,9 +61,22 @@ const EmailReservation = () => {
 
   useEffect(() => {
     const fetchDomain = async () => {
-      const response = await getDomain();
-      console.log('Domain', response.data);
-      setDomain(response.data);
+      try {
+        console.group('Fetching domain');
+        const response = await getDomain();
+        setDomain(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+
+      try {
+        console.group('Fetching email');
+        const response = await getEmail();
+        setEmail(response.data.email);
+        console.log('Email fetched', response.data.email);
+      } catch {
+        setEmail(null);
+      }
     };
     fetchDomain();
   }, []);

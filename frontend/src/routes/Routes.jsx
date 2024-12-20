@@ -2,7 +2,7 @@ import {
   RouterProvider,
   createBrowserRouter,
   Navigate,
-} from 'react-router-dom';
+} from 'react-router';
 import { useAuth } from '@/providers/authProvider';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import { GuestRoute } from './GuestRoute';
@@ -30,7 +30,7 @@ const Routes = () => {
         },
         {
           path: '/profile',
-          element: <EmailReservation />,
+          element: <Profile />,
         },
         {
           path: '/logout',
@@ -62,12 +62,8 @@ const Routes = () => {
           path: '/register',
           element: <Register />,
         },
-        { path: 'verify/:email',
-          element: <VerifyEmail />
-        },
-        { path: 'verified/:token',
-          element: <VerifiedEmail />
-        },
+        { path: 'verify/:email', element: <VerifyEmail /> },
+        { path: 'verified/:token', element: <VerifiedEmail /> },
         {
           path: '*',
           element: <ErrorPage />,
@@ -77,10 +73,21 @@ const Routes = () => {
   ];
 
   // Combine and conditionally include routes based on authentication status
-  const router = createBrowserRouter([
-    ...(!token ? routesForNotAuthenticatedOnly : []),
-    ...routesForAuthenticatedOnly,
-  ]);
+  const router = createBrowserRouter(
+    [
+      ...(!token ? routesForNotAuthenticatedOnly : []),
+      ...routesForAuthenticatedOnly,
+    ],
+    {
+      future: {
+        v7_relativeSplatPath: true,
+        v7_startTransition: true,
+        v7_fetcherPersist: true,
+        v7_normalizeFormMethod: true,
+        v7_partialHydration: true,
+      },
+    }
+  );
 
   // Provide the router configuration using RouterProvider
   return <RouterProvider router={router} />;
