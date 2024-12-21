@@ -24,6 +24,9 @@ pub enum AppError {
     #[error("Email verification link has expired")]
     VerificationExpired,
 
+    #[error("Invalid email format {0}")]
+    InvalidEmailFormat(String),
+
     #[error("Email address is already in use")]
     EmailTaken,
 
@@ -98,6 +101,7 @@ impl From<AppError> for Status {
             AppError::EmailAlreadyReserved => Status::Conflict,
             AppError::NoReservation => Status::NotFound,
             AppError::InvalidReservation => Status::InternalServerError,
+            AppError::InvalidEmailFormat(_) => Status::BadRequest,
             AppError::InvalidEmailPrefix => Status::BadRequest,
             AppError::PasswordHashError(_) => Status::InternalServerError,
             AppError::ConfigError(_) => Status::InternalServerError,

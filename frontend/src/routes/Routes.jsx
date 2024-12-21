@@ -9,7 +9,6 @@ import ErrorPage from '@pages/ErrorPage';
 import Profile from '@pages/Profile';
 import VerifyEmail from '@/pages/VerifyEmail';
 import VerifiedEmail from '@/pages/VerifiedEmail';
-import EmailReservation from '@/components/EmailReservation';
 
 const Routes = () => {
   const { token } = useAuth();
@@ -26,7 +25,7 @@ const Routes = () => {
         },
         {
           path: '/profile',
-          element: <EmailReservation />,
+          element: <Profile />,
         },
         {
           path: '/logout',

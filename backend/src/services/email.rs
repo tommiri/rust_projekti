@@ -1,3 +1,4 @@
+use regex::Regex;
 use crate::services::validate_jwt;
 use crate::db::DbPool;
 use crate::db::schema::{users::dsl as udsl, emails::dsl as edsl};
@@ -121,7 +122,41 @@ impl EmailRepositoryService {
         Ok(email.to_string())
     }
 
+    fn validate_email_prefix(&self, email_prefix: &str) -> Result<()> {
+        // Check length
+        if email_prefix.is_empty() {
+            return Err(AppError::InvalidEmailFormat("Email prefix is required".to_string()));
+        }
+        if email_prefix.len() > 64 {
+            return Err(AppError::InvalidEmailFormat("Email prefix too long".to_string()));
+        }
+
+        // Check regex pattern
+        let re = Regex::new(r"^[a-zA-Z0-9!#$%&'*+\-/=?^_`.{|}~]+(?:\.[a-zA-Z0-9!#$%&'*+\-/=?^_`.{|}~]+)*$")
+            .map_err(|_| AppError::InternalServerError)?;
+        if !re.is_match(email_prefix) {
+            return Err(AppError::InvalidEmailFormat("Invalid characters in email prefix".to_string()));
+        }
+
+        // Check specific rules
+        if email_prefix.starts_with('.') {
+            return Err(AppError::InvalidEmailFormat("Email prefix cannot start with a dot".to_string()));
+        }
+        if email_prefix.ends_with('.') {
+            return Err(AppError::InvalidEmailFormat("Email prefix cannot end with a dot".to_string()));
+        }
+        if email_prefix.contains("..") {
+            return Err(AppError::InvalidEmailFormat("Email prefix cannot contain consecutive dots".to_string()));
+        }
+
+        Ok(())
+    }
+
     pub fn reserve_email(&self, token: &str, email_prefix: &str) -> Result<String> {
+
+        // Validate email prefix
+        self.validate_email_prefix(email_prefix)?;
+
         let decoded_claims = validate_jwt(token, &self.settings)?;
         let user_email = &decoded_claims.sub;
         let mut conn = self.pool.get().map_err(|_| AppError::InternalServerError)?;
@@ -144,6 +179,8 @@ impl EmailRepositoryService {
 
         // Format full email
         let full_email = format!("{}@{}", email_prefix, self.settings.email.domain);
+
+
 
         // Check if email is taken
         let existing_email = edsl::emails
