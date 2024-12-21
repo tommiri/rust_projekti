@@ -1,5 +1,5 @@
 import SiteHeader from '@components/Header';
-import { Outlet } from 'react-router-dom';
+import { Outlet } from 'react-router';
 
 const RootLayout = () => {
   return (

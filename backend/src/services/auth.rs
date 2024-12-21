@@ -140,6 +140,7 @@ impl AuthService {
     }
 
     pub fn verify_token(&self, token: &str) -> Result<()> {
+        
         validate_jwt(token, &self.settings)
             .map(|_| ())
             .map_err(AppError::InvalidToken)

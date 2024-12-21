@@ -43,7 +43,7 @@ impl From<AppError> for ValidationErrorResponse {
     }
 }
 
-pub struct Token(String);
+pub struct Token(pub String);
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for Token {
