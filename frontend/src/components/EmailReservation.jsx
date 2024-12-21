@@ -47,7 +47,7 @@ const FormSchema = z.object({
 
 const EmailReservation = () => {
   const [email, setEmail] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [reserveState, setReserveState] = useState();
   const [deleteState, setDeleteState] = useState();
   const [domain, setDomain] = useState('');
@@ -60,43 +60,45 @@ const EmailReservation = () => {
   });
 
   useEffect(() => {
-    const fetchDomain = async () => {
+    const fetchData = async () => {
       try {
-        console.group('Fetching domain');
         const response = await getDomain();
         setDomain(response.data);
       } catch (error) {
-        console.error(error);
       }
 
       try {
-        console.group('Fetching email');
         const response = await getEmail();
-        setEmail(response.data.email);
-        console.log('Email fetched', response.data.email);
+        setEmail(response.data);
       } catch {
         setEmail(null);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchDomain();
+    fetchData();
   }, []);
 
   const reserveEmailHandler = async (values) => {
     setLoading(true);
+    const email_to_reserve = values.email;
     try {
-      const email_to_reserve = values.email;
       await reserveEmail(email_to_reserve);
       setReserveState({
         success: true,
         message: 'Varaus onnistui',
       });
-
       setEmail(email_to_reserve + '@' + domain);
-      console.log('Email reserved', email);
     } catch (error) {
+      const errorMessages = {
+        409: `Osoite ${email_to_reserve}@${domain} on jo varattu`,
+        default: 'Varaaminen epäonnistui',
+      };
+      const message =
+        errorMessages[error.response?.status] || errorMessages.default;
       setReserveState({
         success: false,
-        message: 'Varaaminen epäonnistui',
+        message,
       });
     } finally {
       setDeleteState(null);
@@ -113,6 +115,7 @@ const EmailReservation = () => {
         message: 'Sähköposti poistettu',
       });
       setEmail(null);
+      form.reset();
     } catch (error) {
       setDeleteState({
         success: false,
@@ -154,7 +157,7 @@ const EmailReservation = () => {
         <div className="flex flex-col items-center">
           <div className="mb-4 flex items-center space-x-10">
             <div className="space-y-1">
-              <p>Sähköpostiosoite:</p>
+              <p>Varattu sähköpostiosoite:</p>
               <p>
                 <strong>{email}</strong>
               </p>

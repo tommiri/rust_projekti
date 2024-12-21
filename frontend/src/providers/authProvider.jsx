@@ -10,7 +10,6 @@ let logoutTimer;
 // the authentication token, a function to set the token and logout function.
 const AuthProvider = ({ children }) => {
   // State to hold the authentication token
-
   const [token, setToken_] = useState(localStorage.getItem(null));
   const [tokenExpirationDate, setTokenExpirationDate] = useState(null);
 

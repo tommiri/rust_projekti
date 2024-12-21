@@ -8,22 +8,24 @@ export const verifyEmail = async (token) => {
 };
 
 export const getEmail = async () => {
-  const response = await axios.get(
-    `${import.meta.env.VITE_API_URL}/api/email/`
-  );
-  return response;
+  try {
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/email/`);
+    return response;
+  } catch (error) {
+    if (error.response?.status === 404) {
+      return null;
+    }
+    throw error;
+  }
 };
 
 export const reserveEmail = async (email) => {
-  console.log("Reserving email", email);
   const response = await axios.post(
     `${import.meta.env.VITE_API_URL}/api/email`,
     {
       email: email,
     }
   );
-  console.log("response", response);
-  return response;
 };
 
 export const deleteEmail = async () => {
@@ -31,10 +33,11 @@ export const deleteEmail = async () => {
     `${import.meta.env.VITE_API_URL}/api/email/`
   );
   return response;
-}
+};
 
 export const getDomain = async () => {
   const response = await axios.get(
-    `${import.meta.env.VITE_API_URL}/api/domain`);
+    `${import.meta.env.VITE_API_URL}/api/domain`
+  );
   return response;
-}
+};

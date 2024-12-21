@@ -30,6 +30,9 @@ pub enum AppError {
     #[error("Email already reserved")]
     EmailAlreadyReserved,
 
+    #[error("Invalid email reservation")]
+    InvalidReservation,
+
     #[error("No email reservation found")]
     NoReservation,
 
@@ -94,6 +97,7 @@ impl From<AppError> for Status {
             AppError::EmailTaken => Status::Conflict,
             AppError::EmailAlreadyReserved => Status::Conflict,
             AppError::NoReservation => Status::NotFound,
+            AppError::InvalidReservation => Status::InternalServerError,
             AppError::InvalidEmailPrefix => Status::BadRequest,
             AppError::PasswordHashError(_) => Status::InternalServerError,
             AppError::ConfigError(_) => Status::InternalServerError,

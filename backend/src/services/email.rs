@@ -54,7 +54,7 @@ impl EmailService {
     }
 
     pub async fn send_verification_email(&self, to: &str, token: &str) -> Result<()> {
-        let verify_url = format!("{}/api/verify/{}", self.base_url, token);
+        let verify_url = format!("{}/verified/{}", self.base_url, token);
 
         let body = self.templates.render(
             "verification",
@@ -110,10 +110,15 @@ impl EmailRepositoryService {
         let email = edsl::emails
             .filter(edsl::user.eq(&user.id))
             .first::<Email>(&mut conn)
-            .optional()?
-            .ok_or(AppError::NoReservation)?;
+            .optional()?;
 
-        Ok(email.email.to_string())
+        if email.is_none() {
+            return Ok(String::new());
+        }
+
+        let email = email.ok_or(AppError::InvalidReservation);
+        let email = email?.email;
+        Ok(email.to_string())
     }
 
     pub fn reserve_email(&self, token: &str, email_prefix: &str) -> Result<String> {

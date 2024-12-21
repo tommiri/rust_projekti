@@ -1,8 +1,4 @@
-import {
-  RouterProvider,
-  createBrowserRouter,
-  Navigate,
-} from 'react-router';
+import { RouterProvider, createBrowserRouter, Navigate } from 'react-router';
 import { useAuth } from '@/providers/authProvider';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import { GuestRoute } from './GuestRoute';
@@ -30,7 +26,7 @@ const Routes = () => {
         },
         {
           path: '/profile',
-          element: <Profile />,
+          element: <EmailReservation />,
         },
         {
           path: '/logout',
@@ -73,21 +69,10 @@ const Routes = () => {
   ];
 
   // Combine and conditionally include routes based on authentication status
-  const router = createBrowserRouter(
-    [
-      ...(!token ? routesForNotAuthenticatedOnly : []),
-      ...routesForAuthenticatedOnly,
-    ],
-    {
-      future: {
-        v7_relativeSplatPath: true,
-        v7_startTransition: true,
-        v7_fetcherPersist: true,
-        v7_normalizeFormMethod: true,
-        v7_partialHydration: true,
-      },
-    }
-  );
+  const router = createBrowserRouter([
+    ...(!token ? routesForNotAuthenticatedOnly : []),
+    ...routesForAuthenticatedOnly,
+  ]);
 
   // Provide the router configuration using RouterProvider
   return <RouterProvider router={router} />;
