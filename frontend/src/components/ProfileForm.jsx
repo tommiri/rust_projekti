@@ -3,24 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-
-const updateEmail = async (email) => {
-  const response = await fetch('http://localhost:8000/email', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
-  });
-  return response;
-};
-
-const updatePassword = async (password) => {
-  const response = await fetch('http://localhost:8000/password', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password }),
-  });
-  return response;
-};
+import { updateEmail, updatePassword } from '@/services/profileChange';
 
 function ProfileForm() {
   const [email, setEmail] = useState('');
