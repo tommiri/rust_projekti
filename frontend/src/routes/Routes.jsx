@@ -29,7 +29,7 @@ const Routes = () => {
         },
         {
           path: '/profile',
-          element: <Profile />,
+         element: <Profile />,
         },
         {
           path: '/logout',
