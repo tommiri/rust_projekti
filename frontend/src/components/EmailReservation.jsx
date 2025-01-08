@@ -12,6 +12,12 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { LoadingSpinner } from './LoadingSpinner';
@@ -64,8 +70,7 @@ const EmailReservation = () => {
       try {
         const response = await getDomain();
         setDomain(response.data);
-      } catch (error) {
-      }
+      } catch (error) {}
 
       try {
         const response = await getEmail();
@@ -132,7 +137,12 @@ const EmailReservation = () => {
   }
 
   return (
-    <>
+    <div>
+      <CardHeader>
+        <CardTitle className="text-2xl">
+          {email ? 'Varattu sähköpostiosoite' : 'Varaa sähköpostiosoite'}
+        </CardTitle>
+      </CardHeader>
       {(reserveState || deleteState) && (
         <Alert
           variant={
@@ -154,62 +164,61 @@ const EmailReservation = () => {
         </Alert>
       )}
       {email ? (
-        <div className="flex flex-col items-center">
-          <div className="mb-4 flex items-center space-x-10">
-            <div className="space-y-1">
-              <p>Varattu sähköpostiosoite:</p>
-              <p>
-                <strong>{email}</strong>
-              </p>
-            </div>
+        <CardContent>
+          <div className="my-4 flex items-center space-x-10">
+            <p>
+              <strong>{email}</strong>
+            </p>
             <Button variant="destructive" onClick={deleteEmailHandler}>
               Poista sähköposti
             </Button>
           </div>
-        </div>
+        </CardContent>
       ) : (
-        <Form {...form}>
-          <form
-            className="space-y-6"
-            onSubmit={form.handleSubmit(reserveEmailHandler)}
-          >
-            <div className="grid w-full items-center gap-4">
-              <div className="flex flex-col space-y-1.5">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel htmlFor="email">
-                        Varaa sähköpostiosoite
-                      </FormLabel>
+        <CardContent>
+          <Form {...form}>
+            <form
+              className="space-y-6"
+              onSubmit={form.handleSubmit(reserveEmailHandler)}
+            >
+              <div className="my-4 grid w-full items-center gap-4">
+                <div className="flex flex-col space-y-1.5">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel htmlFor="email">
+                          Varaa sähköpostiosoite
+                        </FormLabel>
 
-                      <div className="flex items-center gap-2">
-                        <FormControl>
-                          <Input
-                            id="email"
-                            placeholder="Käyttäjänimi"
-                            className="rounded-r-none border-r-0"
-                            {...field}
-                          />
-                        </FormControl>
-                        <div className="flex h-10 items-center rounded-r-lg border bg-gray-50 px-3 font-medium text-gray-500">
-                          @{domain}
+                        <div className="flex items-center gap-2">
+                          <FormControl>
+                            <Input
+                              id="email"
+                              placeholder="Käyttäjänimi"
+                              className="rounded-r-none border-r-0"
+                              {...field}
+                            />
+                          </FormControl>
+                          <div className="flex h-10 items-center rounded-r-lg border bg-gray-50 px-3 font-medium text-gray-500">
+                            @{domain}
+                          </div>
                         </div>
-                      </div>
-                      <FormMessage className="mt-1 text-sm text-red-500" />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage className="mt-1 text-sm text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Button type="submit" className="mt-4 w-full">
+                  Varaa
+                </Button>
               </div>
-              <Button type="submit" className="mt-4 w-full">
-                Varaa
-              </Button>
-            </div>
-          </form>
-        </Form>
+            </form>
+          </Form>
+        </CardContent>
       )}
-    </>
+    </div>
   );
 };
 
