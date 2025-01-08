@@ -189,7 +189,7 @@ const EmailReservation = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel htmlFor="email">
-                          Varaa sähköpostiosoite
+                          Anna sähköpostin alkuosa
                         </FormLabel>
 
                         <div className="flex items-center gap-2">
