@@ -1,5 +1,5 @@
 export const updateEmail = async (email) => {
-  const response = await fetch('http://localhost:8000/email', {
+  const response = await fetch('http://localhost:8000/api/email', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
@@ -8,7 +8,7 @@ export const updateEmail = async (email) => {
 };
 
 export const updatePassword = async (password) => {
-  const response = await fetch('http://localhost:8000/password', {
+  const response = await fetch('http://localhost:8000/api/password', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ password }),
@@ -17,7 +17,7 @@ export const updatePassword = async (password) => {
 };
 
 export const updateFirstname = async (firstname) => {
-  const response = await fetch('http://localhost:8000/Firstname', {
+  const response = await fetch('http://localhost:8000/api/firstname', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ firstname }),
@@ -26,7 +26,7 @@ export const updateFirstname = async (firstname) => {
 };
 
 export const updateLastname = async (lastname) => {
-  const response = await fetch('http://localhost:8000/lastname', {
+  const response = await fetch('http://localhost:8000/api/lastname', {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ lastname }),
