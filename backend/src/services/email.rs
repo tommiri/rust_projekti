@@ -217,12 +217,12 @@ impl EmailRepositoryService {
 
         let mut conn = self.pool.get().map_err(|_| AppError::InternalServerError)?;
 
-        // Find user by their email from JWT claims
+        // Find user by email from JWT claims
         let user = udsl::users
             .filter(udsl::email.eq(user_email))
             .first::<User>(&mut conn)?;
 
-        // Check if user already has a reserved email
+        // Check if user has a reserved email
         let user_existing_reservation = edsl::emails
             .filter(edsl::user.eq(&user.id))
             .first::<Email>(&mut conn)

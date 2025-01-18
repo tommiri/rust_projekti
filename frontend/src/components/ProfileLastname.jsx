@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { updateLastname } from '@/services/profileChange';
 
-function ProfileCardLastname() {
+function ProfileLastname() {
   const [lastname, setLastname] = useState('');
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -22,7 +22,7 @@ function ProfileCardLastname() {
   };
 
   return (
-    <Card className="mx-auto max-w-sm">
+    <div>
       <CardHeader>
         <CardTitle className="text-2xl">Vaihda sukunimi</CardTitle>
         <CardDescription>Anna uusi sukunimi</CardDescription>
@@ -50,8 +50,8 @@ function ProfileCardLastname() {
         {error && <div className="text-red-500">{error}</div>}
         {successMessage && <div className="text-green-500">{successMessage}</div>}
       </CardContent>
-    </Card>
+    </div>
   );
 }
 
-export default ProfileCardLastname;
+export default ProfileLastname;

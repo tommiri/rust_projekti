@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { updatePassword } from '@/services/profileChange';
 
-function ProfileCardPassword() {
+function ProfilePassword() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
-
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +33,7 @@ function ProfileCardPassword() {
   };
 
   return (
-    <Card className="mx-auto max-w-sm">
+    <div>
       <CardHeader>
         <CardTitle className="text-2xl">Vaihda salasana</CardTitle>
         <CardDescription>Anna uusi salasana</CardDescription>
@@ -65,10 +69,12 @@ function ProfileCardPassword() {
       </CardContent>
       <CardContent>
         {error && <div className="text-red-500">{error}</div>}
-        {successMessage && <div className="text-green-500">{successMessage}</div>}
+        {successMessage && (
+          <div className="text-green-500">{successMessage}</div>
+        )}
       </CardContent>
-    </Card>
+    </div>
   );
 }
 
-export default ProfileCardPassword;
+export default ProfilePassword;

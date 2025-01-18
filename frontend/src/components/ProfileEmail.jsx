@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { updateEmail } from '@/services/profileChange';
 
-function ProfileCardEmail() {
+function ProfileEmail() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -22,7 +28,7 @@ function ProfileCardEmail() {
   };
 
   return (
-    <Card className="mx-auto max-w-sm">
+    <div>
       <CardHeader>
         <CardTitle className="text-2xl">Vaihda sähköposti</CardTitle>
         <CardDescription>Anna uusi sähköposti</CardDescription>
@@ -48,10 +54,12 @@ function ProfileCardEmail() {
       </CardContent>
       <CardContent>
         {error && <div className="text-red-500">{error}</div>}
-        {successMessage && <div className="text-green-500">{successMessage}</div>}
+        {successMessage && (
+          <div className="text-green-500">{successMessage}</div>
+        )}
       </CardContent>
-    </Card>
+    </div>
   );
 }
 
-export default ProfileCardEmail;
+export default ProfileEmail;
