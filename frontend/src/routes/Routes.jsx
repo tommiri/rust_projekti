@@ -28,6 +28,10 @@ const Routes = () => {
           element: <Logout />,
         },
         {
+          path: '/profile',
+         element: <Profile />,
+        },
+        {
           path: '*',
           element: <ErrorPage />,
         },
@@ -44,10 +48,6 @@ const Routes = () => {
         {
           index: true,
           element: <Navigate to="/login" />, // Redirect to login page
-        },
-        {
-          path: '/profile',
-         element: <Profile />,
         },
         {
           path: '/login',
