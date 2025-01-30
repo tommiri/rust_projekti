@@ -3,7 +3,12 @@ import { useState } from 'react';
 
 // Import UI components for the card, button, input, and label
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -43,7 +48,7 @@ function ProfileCardFirstname() {
 
   return (
     // Main card component containing the first name update form
-    <Card className="mx-auto max-w-sm">
+    <div className="mx-auto max-w-sm">
       {/* Card header with title and description */}
       <CardHeader>
         <CardTitle className="text-2xl">Vaihda etunimi</CardTitle> {/* Title: "Change First Name" in Finnish */}
@@ -82,7 +87,7 @@ function ProfileCardFirstname() {
         {/* Display success message if first name update succeeds */}
         {successMessage && <div className="text-green-500">{successMessage}</div>}
       </CardContent>
-    </Card>
+    </div>
   );
 }
 
