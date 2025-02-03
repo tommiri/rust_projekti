@@ -6,9 +6,9 @@ export default function Header() {
     <header className="sticky top-0 w-full border-b bg-slate-900">
       <div className="flex h-16 items-center justify-between">
         {/* Desktop */}
-        <MainNav />
+        *<MainNav />*
         {/* Mobile */}
-        <MobileNav />
+        *<MobileNav />*
       </div>
     </header>
   );

@@ -4,4 +4,4 @@ function Profile() {
   return <ProfileCard />;
 }
 
-export default Profile;
+export default Profile; // Export the component for use on the website

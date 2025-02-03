@@ -24,12 +24,12 @@ const Routes = () => {
           element: <Navigate to="/profile" />, // Redirect to profile page
         },
         {
-          path: '/profile',
-         element: <Profile />,
-        },
-        {
           path: '/logout',
           element: <Logout />,
+        },
+        {
+          path: '/profile',
+         element: <Profile />,
         },
         {
           path: '*',
