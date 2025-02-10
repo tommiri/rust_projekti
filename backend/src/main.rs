@@ -6,11 +6,13 @@ mod db;
 mod models;
 mod services;
 mod utils;
+mod validation;
 
 use crate::db::init_pool;
 use crate::utils::config::Settings;
 use crate::utils::cors::cors_fairing;
 use rocket::config::Config as RocketConfig;
+
 
 #[launch]
 fn rocket() -> _ {
@@ -38,7 +40,12 @@ fn rocket() -> _ {
                 api::user,
                 api::login,
                 api::verify_email,
-                api::protected],
+                api::get_email,
+                api::reserve_email,
+                api::delete_email,
+                api::protected,
+                api::get_domain,
+                ],
         )
         .register(
             "/",

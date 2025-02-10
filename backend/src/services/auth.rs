@@ -30,7 +30,13 @@ impl AuthService {
         })
     }
 
-    pub async fn register(&self, email: &str, password: &str) -> Result<()> {
+    pub async fn register(
+        &self,
+        email: &str,
+        password: &str,
+        first_name: &str,
+        last_name: &str,
+    ) -> Result<()> {
         let mut conn = self.pool.get().map_err(|_| AppError::InternalServerError)?;
 
         // Generate password hash
@@ -55,6 +61,8 @@ impl AuthService {
             password_hash: &pass_hash,
             verification_token: Some(&verification_token),
             verification_expires: Some(expires),
+            first_name,
+            last_name,
         };
 
         diesel::insert_into(dsl::users)
@@ -82,11 +90,11 @@ impl AuthService {
         let user = dsl::users
             .filter(dsl::verification_token.eq(Some(token)))
             .filter(dsl::verification_expires.gt(Some(Utc::now().naive_utc())))
-            .first::<User>(&mut conn)?;
-        // .map_err(|e| match e {
-        //     diesel::result::Error::NotFound => AppError::InvalidToken,
-        //     _ => AppError::DatabaseError(e),
-        // })?;
+            .first::<User>(&mut conn)
+            .map_err(|e| match e {
+                diesel::result::Error::NotFound => AppError::AuthenticationError,
+                _ => AppError::DatabaseError(e),
+            })?;
 
         // Update user verification status
         diesel::update(dsl::users.find(user.id))
@@ -107,7 +115,10 @@ impl AuthService {
         let user = dsl::users
             .filter(dsl::email.eq(email))
             .first::<User>(&mut conn)
-            .map_err(|_| AppError::AuthenticationError)?;
+            .map_err(|e| match e {
+                diesel::result::Error::NotFound => AppError::AuthenticationError,
+                _ => AppError::DatabaseError(e),
+            })?;
 
         // Check email verification
         if !user.email_verified {
@@ -129,6 +140,7 @@ impl AuthService {
     }
 
     pub fn verify_token(&self, token: &str) -> Result<()> {
+        
         validate_jwt(token, &self.settings)
             .map(|_| ())
             .map_err(AppError::InvalidToken)

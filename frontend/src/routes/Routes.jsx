@@ -1,8 +1,4 @@
-import {
-  RouterProvider,
-  createBrowserRouter,
-  Navigate,
-} from 'react-router-dom';
+import { RouterProvider, createBrowserRouter, Navigate } from 'react-router';
 import { useAuth } from '@/providers/authProvider';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import { GuestRoute } from './GuestRoute';
@@ -28,12 +24,12 @@ const Routes = () => {
           element: <Navigate to="/profile" />, // Redirect to profile page
         },
         {
-          path: '/profile',
-          element: <Profile />,
-        },
-        {
           path: '/logout',
           element: <Logout />,
+        },
+        {
+          path: '/profile',
+         element: <Profile />,
         },
         {
           path: '*',

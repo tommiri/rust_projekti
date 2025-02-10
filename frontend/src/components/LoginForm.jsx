@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -10,8 +11,10 @@ import {
   FormControl,
   FormLabel,
   FormItem,
+  FormMessage,
 } from '@/components/ui/form';
-import login from '@/services/login';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { login } from '@/services/auth';
 import { useAuth } from '@/providers/authProvider';
 
 const FormSchema = z.object({
@@ -25,6 +28,7 @@ const FormSchema = z.object({
 const LoginForm = () => {
   const navigate = useNavigate();
   const auth = useAuth();
+  const [loginError, setLoginError] = useState(null);
 
   const form = useForm({
     resolver: zodResolver(FormSchema),
@@ -37,15 +41,33 @@ const LoginForm = () => {
   const handleLogin = async (values) => {
     const email = values.email;
     const password = values.password;
-    const data = await login(email, password);
-    auth.setToken(data.data);
-    navigate('/profile');
+    try {
+      const response = await login(email, password);
+      if (
+        response.data.message == 'Validation failed' ||
+        response.data.message == 'Invalid email or password' ||
+        response.data.message == 'Please verify your email before logging in'
+      ) {
+        throw new Error(response.data.message);
+      }
+      auth.setToken(response.data);
+      navigate('/profile');
+    } catch (error) {
+      setLoginError(
+        error.message || 'Kirjautuminen epäonnistui. Yritä uudelleen.'
+      );
+    }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleLogin)}>
         <div className="grid gap-4">
+          {loginError && (
+            <Alert variant="destructive">
+              <AlertDescription>{loginError}</AlertDescription>
+            </Alert>
+          )}
           <div className="grid gap-2">
             <FormField
               control={form.control}
@@ -56,6 +78,7 @@ const LoginForm = () => {
                   <FormControl>
                     <Input type="email" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -78,6 +101,7 @@ const LoginForm = () => {
                   <FormControl>
                     <Input type="password" autoComplete="on" {...field} />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />

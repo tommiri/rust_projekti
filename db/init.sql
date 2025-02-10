@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS `users` (
   `id` BINARY(16) NOT NULL DEFAULT (UUID_TO_BIN(UUID())),
   `email` VARCHAR(255) NOT NULL UNIQUE,
-  `first_name` VARCHAR(100),
-  `last_name` VARCHAR(100),
+  `first_name` VARCHAR(100) NOT NULL,
+  `last_name` VARCHAR(100) NOT NULL,
   `password_hash` VARCHAR(255) NOT NULL,
   `email_verified` BOOLEAN NOT NULL DEFAULT FALSE,
   `verification_token` VARCHAR(255),
@@ -25,18 +25,19 @@ CREATE TABLE IF NOT EXISTS `emails` (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
 -- Insert a test user
-INSERT INTO `users`
-  (
-   `email`,
-   `first_name`,
-   `last_name`,
-   `password_hash`,
-   `email_verified`
+INSERT INTO
+  `users` (
+    `email`,
+    `first_name`,
+    `last_name`,
+    `password_hash`,
+    `email_verified`
   )
 VALUES
   (
-  'test@example.com',
-  'Test',
-  'User',
-  '$argon2id$v=19$m=19456,t=2,p=1$Xafb2ty3hkee61MQJ8TY3g$e88StT3jn5DIlXMktzRuaIzZwSEhNhLB7Ou1GRzlaO8',
-   TRUE);
+    'test@example.com',
+    'Test',
+    'User',
+    '$argon2id$v=19$m=19456,t=2,p=1$fP9FN86U/KZYiy8t7a4Ylw$3daM1q7vSfwJTtool00B74++NeAiaXwypdKApSxR7QM',
+    TRUE
+  );

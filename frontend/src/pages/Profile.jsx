@@ -1,7 +1,7 @@
-import ProfileForm from '@components/ProfileForm';
+import ProfileCard from '@/components/ProfileCard';
 
 function Profile() {
-  return <ProfileForm />;
+  return <ProfileCard />;
 }
 
-export default Profile;
+export default Profile; // Export the component for use on the website

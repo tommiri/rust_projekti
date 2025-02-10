@@ -19,9 +19,9 @@ diesel::table! {
         #[max_length = 255]
         email -> Varchar,
         #[max_length = 100]
-        first_name -> Nullable<Varchar>,
+        first_name -> Varchar,
         #[max_length = 100]
-        last_name -> Nullable<Varchar>,
+        last_name -> Varchar,
         #[max_length = 255]
         password_hash -> Varchar,
         email_verified -> Bool,

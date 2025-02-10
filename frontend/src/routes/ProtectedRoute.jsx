@@ -1,4 +1,4 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate } from 'react-router';
 import { useAuth } from '@/providers/authProvider';
 import RootLayout from '@/pages/RootLayout';
 
