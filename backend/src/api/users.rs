@@ -1,48 +1,53 @@
-// // User management routes
-// // Login/register routes
-// use crate::db::DbPool;
-// use crate::services::AuthService;
-// use crate::utils::config::Settings;
-// use crate::utils::errors::AppError;
+// User management routes
+// Login/register routes
+use crate::db::DbPool;
+use crate::services::AuthService;
+use crate::utils::config::Settings;
+use crate::utils::errors::AppError;
+use crate::services::UserService;
+use crate::models::user::User;
+use handlebars::Handlebars;
 
-// use rocket::request::{FromRequest, Outcome};
-// use rocket::{get, http::Status, post, serde::json::Json, Request};
-// use serde::Deserialize;
+use rocket::request::{FromRequest, Outcome};
+use rocket::{get, http::Status, post, serde::json::Json, Request};
+use serde::Deserialize;
 
-// pub struct Token(String);
+pub struct Token(String);
 
-// #[rocket::async_trait]
-// impl<'r> FromRequest<'r> for Token {
-//     type Error = AppError;
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for Token {
+    type Error = AppError;
 
-//     async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-//         match req.headers().get_one("Authorization") {
-//             Some(header) => {
-//                 if let Some(token) = header.strip_prefix("Bearer ") {
-//                     Outcome::Success(Token(token.to_string()))
-//                 } else {
-//                     Outcome::Error((Status::Unauthorized, AppError::AuthenticationError))
-//                 }
-//             }
-//             None => Outcome::Error((Status::Unauthorized, AppError::AuthenticationError)),
-//         }
-//     }
-// }
+    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+        match req.headers().get_one("Authorization") {
+            Some(header) => {
+                if let Some(token) = header.strip_prefix("Bearer ") {
+                    Outcome::Success(Token(token.to_string()))
+                } else {
+                    Outcome::Error((Status::Unauthorized, AppError::AuthenticationError))
+                }
+            }
+            None => Outcome::Error((Status::Unauthorized, AppError::AuthenticationError)),
+        }
+    }
+}
 
-// #[post("/getme", data = "<auth>")]
-// pub async fn register(
-//     token: Token,
-//     db: &rocket::State<DbPool>,
-//     settings: &rocket::State<Settings>,
-// ) -> Result<Json<String>, Status> {
-//     let auth_service = AuthService::new(db.inner().clone(), settings.inner().clone())?;
-//     match auth_service.verify_token(&token.0) {
-//         Ok(_) => {
-//             Ok(Json("Access granted".to_string()))
-//         }
-//         Err(e) => {
-//             error!("Token verification error: {}", e);
-//             Err(e.into())
-//         }
-//     }
-// }
+#[get("/user/<user_id>")]
+pub async fn get_user(
+    user_id: i32,
+    db: &rocket::State<DbPool>,
+    settings: &rocket::State<Settings>,
+) -> Result<Json<User>, Status> {
+    let user_service = UserService::new(settings.inner(), Handlebars::new()).map_err(|e| {
+        error!("Failed to create UserService: {}", e);
+        Status::InternalServerError
+    })?;
+
+    match user_service.get_user(user_id, db).await {
+        Ok(user) => Ok(Json(user)),
+        Err(e) => {
+            error!("Failed to get user: {}", e);
+            Err(Status::InternalServerError)
+        }
+    }
+}

@@ -37,7 +37,7 @@ fn rocket() -> _ {
                 api::health,
                 api::options,
                 api::register,
-                api::user,
+                api::users,
                 api::login,
                 api::verify_email,
                 api::get_email,
