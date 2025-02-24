@@ -43,7 +43,7 @@ pub async fn get_user(
         Status::InternalServerError
     })?;
 
-    match user_service.get_user(user_id, db).await {
+    match user_service.get_user(user_id).await {
         Ok(user) => Ok(Json(user)),
         Err(e) => {
             error!("Failed to get user: {}", e);
@@ -51,3 +51,23 @@ pub async fn get_user(
         }
     }
 }
+
+// #[get("/user/<user_id>")]
+// pub async fn get_user(
+//     user_id: i32,
+//     db: &rocket::State<DbPool>,
+//     settings: &rocket::State<Settings>,
+// ) -> Result<Json<User>, Status> {
+//     let user_service = UserService::new(settings.inner(), Handlebars::new()).map_err(|e| {
+//         error!("Failed to create UserService: {}", e);
+//         Status::InternalServerError
+//     })?;
+
+//     match user_service.get_user(user_id, db).await {
+//         Ok(user) => Ok(Json(user)),
+//         Err(e) => {
+//             error!("Failed to get user: {}", e);
+//             Err(Status::InternalServerError)
+//         }
+//     }
+// }
