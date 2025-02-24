@@ -3,7 +3,6 @@ use crate::utils::errors::{AppError, Result};
 use crate::models::user::User;
 use chrono::NaiveDateTime;
 use handlebars::Handlebars;
-use uuid::Uuid;
 
 pub struct UserService {
     templates: Handlebars<'static>,
@@ -23,7 +22,7 @@ impl UserService {
     pub async fn get_user(&self, user_id: i32) -> Result<User> {
         // Create a dummy user for debugging purposes
         let dummy_user = User {
-            id: Uuid::new_v4().as_bytes().to_vec(), // Generate a random UUID
+            id: generate_dummy_id(), // Generate a random UUID
             email: "dummy@example.com".to_string(),
             first_name: "Dummy".to_string(),
             last_name: "User".to_string(),
@@ -38,7 +37,9 @@ impl UserService {
         Ok(dummy_user)
     }
 }
-
+fn generate_dummy_id() -> Vec<u8> {
+    vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+}
 // use crate::utils::config::Settings;
 // use crate::utils::errors::{AppError, Result};
 // use crate::db::DbPool;

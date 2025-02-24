@@ -32,18 +32,20 @@ impl<'r> FromRequest<'r> for Token {
     }
 }
 
-#[get("/user/<user_id>")]
+#[get("/user")]
 pub async fn get_user(
-    user_id: i32,
+    // user_id: i32,
     db: &rocket::State<DbPool>,
     settings: &rocket::State<Settings>,
 ) -> Result<Json<User>, Status> {
+    // println!("Received request for user_id: {}", user_id); // Add this line for debugging
+
     let user_service = UserService::new(settings.inner(), Handlebars::new()).map_err(|e| {
         error!("Failed to create UserService: {}", e);
         Status::InternalServerError
     })?;
 
-    match user_service.get_user(user_id).await {
+    match user_service.get_user(1).await {
         Ok(user) => Ok(Json(user)),
         Err(e) => {
             error!("Failed to get user: {}", e);
@@ -51,7 +53,6 @@ pub async fn get_user(
         }
     }
 }
-
 // #[get("/user/<user_id>")]
 // pub async fn get_user(
 //     user_id: i32,

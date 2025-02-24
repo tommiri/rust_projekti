@@ -13,7 +13,6 @@ use crate::utils::config::Settings;
 use crate::utils::cors::cors_fairing;
 use rocket::config::Config as RocketConfig;
 
-
 #[launch]
 fn rocket() -> _ {
     // Load settings
@@ -37,7 +36,7 @@ fn rocket() -> _ {
                 api::health,
                 api::options,
                 api::register,
-                api::get_user,
+                api::get_user, // Ensure this line is present
                 api::login,
                 api::verify_email,
                 api::get_email,
@@ -45,7 +44,7 @@ fn rocket() -> _ {
                 api::delete_email,
                 api::protected,
                 api::get_domain,
-                ],
+            ],
         )
         .register(
             "/",
@@ -53,7 +52,6 @@ fn rocket() -> _ {
                 api::unauthorized,
                 api::not_found,
                 api::internal_error,
-                api::default_catcher
             ],
         )
 }
