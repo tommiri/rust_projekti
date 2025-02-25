@@ -1,45 +1,47 @@
-use crate::utils::config::Settings;
+use crate::db::DbPool;
 use crate::utils::errors::{AppError, Result};
 use crate::models::user::User;
+use crate::utils::config::Settings;
+use crate::services::validate_jwt;
 use chrono::NaiveDateTime;
-use handlebars::Handlebars;
+use diesel::prelude::*;
+use diesel::result::Error as DieselError;
+
+use crate::db::schema::{users::dsl as udsl};
+use crate::db::schema::users;
 
 pub struct UserService {
-    templates: Handlebars<'static>,
-    from_email: String,
-    base_url: String,
+    db_pool: DbPool,
+    settings: Settings,
 }
 
 impl UserService {
-    pub fn new(settings: &Settings, templates: Handlebars<'static>) -> Result<Self> {
+    pub fn new(db_pool: DbPool, settings: Settings) -> Result<Self> {
         Ok(Self {
-            templates,
-            from_email: settings.smtp.from_email.clone(),
-            base_url: settings.server.base_url.clone(),
+            db_pool,
+            settings,
         })
     }
 
-    pub async fn get_user(&self, user_id: i32) -> Result<User> {
-        // Create a dummy user for debugging purposes
-        let dummy_user = User {
-            id: generate_dummy_id(), // Generate a random UUID
-            email: "dummy@example.com".to_string(),
-            first_name: "Dummy".to_string(),
-            last_name: "User".to_string(),
-            password_hash: "dummy_hash".to_string(),
-            email_verified: false,
-            verification_token: Some("dummy_token".to_string()),
-            verification_expires: Some(NaiveDateTime::from_timestamp(0, 0)),
-            created_at: NaiveDateTime::from_timestamp(0, 0),
-            updated_at: NaiveDateTime::from_timestamp(0, 0),
-        };
+    pub async fn get_user_by_token(&self, token: &str) -> Result<User> {
+        // Validate the token and extract the email
+        let decoded_claims = validate_jwt(token, &self.settings)?;
+        let user_email = &decoded_claims.sub;
 
-        Ok(dummy_user)
+        // Query the database for the user by email
+        let mut conn = self.db_pool.get().map_err(|_| AppError::InternalServerError)?;
+        let user = udsl::users
+            .filter(udsl::email.eq(user_email))
+            .first::<User>(&mut conn)
+            .map_err(AppError::from)?;
+
+        Ok(user)
     }
 }
-fn generate_dummy_id() -> Vec<u8> {
-    vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-}
+
+// fn generate_dummy_id() -> Vec<u8> {
+//     vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+// }
 // use crate::utils::config::Settings;
 // use crate::utils::errors::{AppError, Result};
 // use crate::db::DbPool;

@@ -6,46 +6,29 @@ use crate::utils::config::Settings;
 use crate::utils::errors::AppError;
 use crate::services::UserService;
 use crate::models::user::User;
+use crate::api::auth::Token;
+
 use handlebars::Handlebars;
-
-use rocket::request::{FromRequest, Outcome};
-use rocket::{get, http::Status, post, serde::json::Json, Request};
+use rocket::{http::Status, post, request::{FromRequest, Request, Outcome}};
 use serde::Deserialize;
+use rocket::serde::json::{Json, Value, json};
+// use rocket::request::{FromRequest, Outcome};
+// use rocket::{get, http::Status, post, serde::json::Json, Request};
+// use serde::Deserialize;
 
-pub struct Token(String);
-
-#[rocket::async_trait]
-impl<'r> FromRequest<'r> for Token {
-    type Error = AppError;
-
-    async fn from_request(req: &'r Request<'_>) -> Outcome<Self, Self::Error> {
-        match req.headers().get_one("Authorization") {
-            Some(header) => {
-                if let Some(token) = header.strip_prefix("Bearer ") {
-                    Outcome::Success(Token(token.to_string()))
-                } else {
-                    Outcome::Error((Status::Unauthorized, AppError::AuthenticationError))
-                }
-            }
-            None => Outcome::Error((Status::Unauthorized, AppError::AuthenticationError)),
-        }
-    }
-}
 
 #[get("/user")]
 pub async fn get_user(
-    // user_id: i32,
     db: &rocket::State<DbPool>,
     settings: &rocket::State<Settings>,
+    token: Token,
 ) -> Result<Json<User>, Status> {
-    // println!("Received request for user_id: {}", user_id); // Add this line for debugging
-
-    let user_service = UserService::new(settings.inner(), Handlebars::new()).map_err(|e| {
+    let user_service = UserService::new(db.inner().clone(), settings.inner().clone()).map_err(|e| {
         error!("Failed to create UserService: {}", e);
         Status::InternalServerError
     })?;
 
-    match user_service.get_user(1).await {
+    match user_service.get_user_by_token(&token.0).await {
         Ok(user) => Ok(Json(user)),
         Err(e) => {
             error!("Failed to get user: {}", e);

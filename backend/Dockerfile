@@ -56,7 +56,7 @@ COPY /templates templates
 RUN --mount=type=cache,target=/app/target/ \
     --mount=type=cache,target=/usr/local/cargo/registry/ \
     set -eux; \
-    cargo build; \
+    cargo build --release; \
     cp ./target/release/$pkg /main
 
 ################################################################################

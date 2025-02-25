@@ -3,6 +3,7 @@ use crate::db::DbPool;
 use crate::models::{NewUser, User};
 use crate::services::email::EmailService;
 use crate::services::jwt::{generate_jwt, validate_jwt};
+use crate::services::user::UserService;
 use crate::utils::config::Settings;
 use crate::utils::errors::{AppError, Result};
 
@@ -18,15 +19,19 @@ pub struct AuthService {
     pool: DbPool,
     settings: Settings,
     email_service: EmailService,
+    user_service: UserService,
 }
 
 impl AuthService {
     pub fn new(pool: DbPool, settings: Settings) -> Result<Self> {
         let email_service = EmailService::new(&settings)?;
+        let user_service = UserService::new(pool.clone(), settings.clone())?;
+
         Ok(Self {
             pool,
             settings,
             email_service,
+            user_service,
         })
     }
 
