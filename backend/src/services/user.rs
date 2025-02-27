@@ -6,6 +6,9 @@ use crate::services::validate_jwt;
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
 use diesel::result::Error as DieselError;
+use diesel::r2d2::{ConnectionManager, PooledConnection};
+use argon2::{password_hash::{rand_core::OsRng, SaltString, PasswordHasher}, Argon2};
+use regex::Regex;
 
 use crate::db::schema::{users::dsl as udsl};
 use crate::db::schema::users;
@@ -23,13 +26,47 @@ impl UserService {
         })
     }
 
-    pub async fn get_user_by_token(&self, token: &str) -> Result<User> {
-        // Validate the token and extract the email
+    fn get_user_email_and_conn(&self, token: &str) -> Result<(String, PooledConnection<ConnectionManager<MysqlConnection>>)> {
         let decoded_claims = validate_jwt(token, &self.settings)?;
-        let user_email = &decoded_claims.sub;
+        let user_email = decoded_claims.sub;
 
-        // Query the database for the user by email
-        let mut conn = self.db_pool.get().map_err(|_| AppError::InternalServerError)?;
+        let conn = self.db_pool.get().map_err(|_| AppError::InternalServerError)?;
+        Ok((user_email, conn))
+    }
+
+    fn validate_email_prefix(&self, email_prefix: &str) -> Result<()> {
+        // Check length
+        if email_prefix.is_empty() {
+            return Err(AppError::InvalidEmailFormat("Email prefix is required".to_string()));
+        }
+        if email_prefix.len() > 64 {
+            return Err(AppError::InvalidEmailFormat("Email prefix too long".to_string()));
+        }
+
+        // Check regex pattern
+        let re = Regex::new(r"^[a-zA-Z0-9!#$%&'*+\-/=?^_`.{|}~]+(?:\.[a-zA-Z0-9!#$%&'*+\-/=?^_`.{|}~]+)*$")
+            .map_err(|_| AppError::InternalServerError)?;
+        if !re.is_match(email_prefix) {
+            return Err(AppError::InvalidEmailFormat("Invalid characters in email prefix".to_string()));
+        }
+
+        // Check specific rules
+        if email_prefix.starts_with('.') {
+            return Err(AppError::InvalidEmailFormat("Email prefix cannot start with a dot".to_string()));
+        }
+        if email_prefix.ends_with('.') {
+            return Err(AppError::InvalidEmailFormat("Email prefix cannot end with a dot".to_string()));
+        }
+        if email_prefix.contains("..") {
+            return Err(AppError::InvalidEmailFormat("Email prefix cannot contain consecutive dots".to_string()));
+        }
+
+        Ok(())
+    }
+
+    pub async fn get_user_by_token(&self, token: &str) -> Result<User> {
+        let (user_email, mut conn) = self.get_user_email_and_conn(token)?;
+
         let user = udsl::users
             .filter(udsl::email.eq(user_email))
             .first::<User>(&mut conn)
@@ -37,63 +74,60 @@ impl UserService {
 
         Ok(user)
     }
+
+    pub async fn update_email_by_token(&self, token: &str, new_email: &str) -> Result<()> {
+        // Validate email prefix
+        let email_prefix = new_email.split('@').next().ok_or(AppError::InvalidEmailFormat("Invalid email format".to_string()))?;
+        self.validate_email_prefix(email_prefix)?;
+
+        let (user_email, mut conn) = self.get_user_email_and_conn(token)?;
+
+        diesel::update(udsl::users.filter(udsl::email.eq(user_email)))
+            .set(udsl::email.eq(new_email))
+            .execute(&mut conn)
+            .map_err(AppError::from)?;
+
+        Ok(())
+    }
+
+    pub async fn update_password_by_token(&self, token: &str, new_password: &str) -> Result<()> {
+        let (user_email, mut conn) = self.get_user_email_and_conn(token)?;
+
+        // Generate password hash
+        let salt = SaltString::generate(&mut OsRng);
+        let argon2 = Argon2::default();
+        let pass_hash = argon2
+            .hash_password(new_password.as_bytes(), &salt)
+            .map_err(|e| AppError::PasswordHashError(e.to_string()))?
+            .to_string();
+
+        diesel::update(udsl::users.filter(udsl::email.eq(user_email)))
+            .set(udsl::password_hash.eq(pass_hash))
+            .execute(&mut conn)
+            .map_err(AppError::from)?;
+
+        Ok(())
+    }
+
+    pub async fn update_first_name_by_token(&self, token: &str, new_first_name: &str) -> Result<()> {
+        let (user_email, mut conn) = self.get_user_email_and_conn(token)?;
+
+        diesel::update(udsl::users.filter(udsl::email.eq(user_email)))
+            .set(udsl::first_name.eq(new_first_name))
+            .execute(&mut conn)
+            .map_err(AppError::from)?;
+
+        Ok(())
+    }
+
+    pub async fn update_last_name_by_token(&self, token: &str, new_last_name: &str) -> Result<()> {
+        let (user_email, mut conn) = self.get_user_email_and_conn(token)?;
+
+        diesel::update(udsl::users.filter(udsl::email.eq(user_email)))
+            .set(udsl::last_name.eq(new_last_name))
+            .execute(&mut conn)
+            .map_err(AppError::from)?;
+
+        Ok(())
+    }
 }
-
-// fn generate_dummy_id() -> Vec<u8> {
-//     vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
-// }
-// use crate::utils::config::Settings;
-// use crate::utils::errors::{AppError, Result};
-// use crate::db::DbPool;
-// use crate::models::user::User;
-// use diesel::prelude::*;
-// use handlebars::Handlebars;
-// use lettre::message::header;
-// use lettre::transport::smtp::authentication::Credentials;
-// use lettre::transport::smtp::AsyncSmtpTransport;
-// use lettre::AsyncTransport;
-// use lettre::Message;
-// use lettre::Tokio1Executor;
-// use serde_json::json;
-
-
-// pub struct UserService {
-//     smtp: AsyncSmtpTransport<Tokio1Executor>,
-//     templates: Handlebars<'static>,
-//     from_email: String,
-//     base_url: String,
-// }
-
-// impl UserService {
-//     pub fn new(settings: &Settings, templates: Handlebars<'static>) -> Result<Self> {
-//         let creds = Credentials::new(
-//             settings.smtp.username.clone(),
-//             settings.smtp.password.clone(),
-//         );
-
-//         let smtp = AsyncSmtpTransport::<Tokio1Executor>::starttls_relay(&settings.smtp.host)
-//             .map_err(|e| AppError::SmtpError(e))?
-//             .port(settings.smtp.port)
-//             .credentials(creds)
-//             .build();
-
-//         Ok(Self {
-//             smtp,
-//             templates,
-//             from_email: settings.smtp.from_email.clone(),
-//             base_url: settings.server.base_url.clone(),
-//         })
-//     }
-
-//     pub async fn get_user(&self, user_id: i32, db_pool: &DbPool) -> Result<User> {
-//         use crate::db::schema::users::dsl::*; // Updated import path
-
-
-//         let conn = db_pool.get().map_err(|e| AppError::DbPoolError(e.to_string()))?;
-//         let user = web::block(move || users.filter(id.eq(user_id)).first::<User>(&conn))
-//             .await
-//             .map_err(|e| AppError::DbError(e.to_string()))?;
-
-//         Ok(user)
-//     }
-// }

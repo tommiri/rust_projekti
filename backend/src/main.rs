@@ -36,7 +36,11 @@ fn rocket() -> _ {
                 api::health,
                 api::options,
                 api::register,
-                api::get_user, // Ensure this line is present
+                api::get_user, 
+                api::update_email,
+                api::update_password,
+                api::update_first_name,
+                api::update_last_name,
                 api::login,
                 api::verify_email,
                 api::get_email,
