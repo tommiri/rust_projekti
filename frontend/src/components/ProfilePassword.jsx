@@ -20,7 +20,6 @@ function ProfileCardPassword() {
   const { token } = useAuth(); // Use the useAuth hook to get the authentication token
   // State to store the new password input value
   const [password, setPassword] = useState('');
-
   // State to store any error message if the password update fails
   const [error, setError] = useState(null);
 
@@ -30,6 +29,7 @@ function ProfileCardPassword() {
   // Event handler for form submission
   const handlePasswordSubmit = async (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
+
 
     if (!token) {
       setError('You must be logged in to update your password.');

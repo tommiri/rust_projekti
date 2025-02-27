@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ProfileData } from '@/services/ProfileData';
+
 import { useAuth } from '@/providers/authProvider';
 
 const ProfileDisplay = () => {

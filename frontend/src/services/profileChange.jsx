@@ -37,6 +37,7 @@ export const updateFirstname = async (firstname, token) => {
 };
 
 export const updateLastname = async (lastname, token) => {
+
   const response = await fetch('http://localhost:8000/api/lastname', {
     method: 'PUT',
     headers: {
