@@ -14,8 +14,10 @@ import { Label } from '@/components/ui/label';
 
 // Import a service function to handle first name updates
 import { updateFirstname } from '@/services/profileChange';
+import { useAuth } from '@/providers/authProvider';
 
 function ProfileCardFirstname() {
+  const { token } = useAuth(); // Use the useAuth hook to get the authentication token
   // State to store the first name input value
   const [firstname, setFirstname] = useState('');
 
@@ -29,9 +31,14 @@ function ProfileCardFirstname() {
   const handleFirstnameSubmit = async (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
 
+    if (!token) {
+      setError('You must be logged in to update your first name.');
+      return;
+    }
+
     try {
       // Attempt to update the first name via the updateFirstname service
-      await updateFirstname(firstname);
+      await updateFirstname(firstname, token);
 
       // Reset the first name input field and set a success message
       setFirstname('');
@@ -41,7 +48,7 @@ function ProfileCardFirstname() {
       setError(null);
     } catch (err) {
       // Handle errors by displaying an error message
-      setError('Failed to update First name.');
+      setError('Failed to update first name.');
       setSuccessMessage(null);
     }
   };

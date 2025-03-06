@@ -14,14 +14,12 @@ import { Label } from '@/components/ui/label';
 
 // Import a service function to handle password updates
 import { updatePassword } from '@/services/profileChange';
+import { useAuth } from '@/providers/authProvider';
 
 function ProfileCardPassword() {
+  const { token } = useAuth(); // Use the useAuth hook to get the authentication token
   // State to store the new password input value
   const [password, setPassword] = useState('');
-
-  // State to store the confirmation password input value
-  const [confirmPassword, setConfirmPassword] = useState('');
-
   // State to store any error message if the password update fails
   const [error, setError] = useState(null);
 
@@ -32,19 +30,18 @@ function ProfileCardPassword() {
   const handlePasswordSubmit = async (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
 
-    // Check if passwords match before proceeding
-    if (password !== confirmPassword) {
-      setError('Passwords do not match!'); // Display an error if they don't match
+
+    if (!token) {
+      setError('You must be logged in to update your password.');
       return;
     }
 
     try {
       // Attempt to update the password via the updatePassword service
-      await updatePassword(password);
+      await updatePassword(password, token);
 
       // Reset the password input fields and set a success message
       setPassword('');
-      setConfirmPassword('');
       setSuccessMessage('Password updated successfully!');
 
       // Clear any existing error message
@@ -78,18 +75,6 @@ function ProfileCardPassword() {
                 value={password} // Controlled input linked to password state
                 required // Makes the field required
                 onChange={(e) => setPassword(e.target.value)} // Update state on input change
-              />
-            </div>
-
-            {/* Confirm password input field */}
-            <div className="grid gap-2">
-              <Label htmlFor="confirmPassword">Varmista salasana</Label> {/* Label: "Confirm Password" in Finnish */}
-              <Input
-                id="confirmPassword"
-                type="password" // Ensures the input is masked
-                value={confirmPassword} // Controlled input linked to confirmPassword state
-                required // Makes the field required
-                onChange={(e) => setConfirmPassword(e.target.value)} // Update state on input change
               />
             </div>
 
