@@ -77,6 +77,11 @@ impl UserService {
 
     pub async fn update_email_by_token(&self, token: &str, new_email: &str) -> Result<()> {
         // Validate email prefix
+        // Validate email format
+        if !new_email.contains('@') {
+            return Err(AppError::InvalidEmailFormat("Email must contain '@'".to_string()));
+        }
+        println!("new_email: {}", new_email);
         let email_prefix = new_email.split('@').next().ok_or(AppError::InvalidEmailFormat("Invalid email format".to_string()))?;
         self.validate_email_prefix(email_prefix)?;
 

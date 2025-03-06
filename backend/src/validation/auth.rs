@@ -24,3 +24,9 @@ pub struct LoginValidator {
     #[validate(length(min = 8, message = "Password must be at least 8 characters long"))]
     pub password: String,
 }
+
+#[derive(Debug, Serialize, Deserialize, Validate)]
+pub struct UpdatePasswordValidator {
+    #[validate(length(min = 8, message = "Password must be at least 8 characters long"))]
+    pub password: String,
+}

@@ -7,14 +7,51 @@ use crate::utils::errors::AppError;
 use crate::services::UserService;
 use crate::models::user::User;
 use crate::api::auth::Token;
+use crate::validation::{UpdatePasswordValidator};
 
+use serde::Serialize;
+use validator::{Validate, ValidationErrors};
 use handlebars::Handlebars;
 use rocket::{http::Status, post, put, request::{FromRequest, Request, Outcome}};
 use serde::Deserialize;
 use rocket::serde::json::{Json, Value, json};
+
 // use rocket::request::{FromRequest, Outcome};
 // use rocket::{get, http::Status, post, serde::json::Json, Request};
 // use serde::Deserialize;
+
+#[derive(Debug, Serialize)]
+pub struct ValidationErrorResponse {
+    pub message: String,
+    pub errors: Vec<String>,
+}
+
+impl From<ValidationErrors> for ValidationErrorResponse {
+    fn from(errors: ValidationErrors) -> Self {
+        let error_messages: Vec<String> = errors
+            .field_errors()
+            .values()
+            .flat_map(|errs| {
+                errs.iter()
+                    .map(|e| e.message.clone().unwrap_or_default().to_string())
+            })
+            .collect();
+
+        Self {
+            message: "Validation failed".to_string(),
+            errors: error_messages,
+        }
+    }
+}
+
+impl From<AppError> for ValidationErrorResponse {
+    fn from(error: AppError) -> Self {
+        Self {
+            message: error.to_string(),
+            errors: vec![error.to_string()],
+        }
+    }
+}
 
 #[derive(Deserialize)]
 struct UpdateField {
@@ -73,19 +110,22 @@ pub async fn update_password(
     db: &rocket::State<DbPool>,
     settings: &rocket::State<Settings>,
     token: Token,
-    update_field: Json<UpdateField>,
-) -> Result<Status, Status> {
+    update_field: Json<UpdatePasswordValidator>,
+) -> Result<Status, Json<ValidationErrorResponse>> {
+    if let Err(errors) = update_field.validate() {
+        error!("Validation errors: {:?}", errors);
+        return Err(Json(ValidationErrorResponse::from(errors)));
+    }
+
     let user_service = UserService::new(db.inner().clone(), settings.inner().clone()).map_err(|e| {
         error!("Failed to create UserService: {}", e);
-        Status::InternalServerError
+        Json(ValidationErrorResponse::from(e))
     })?;
 
-    if let Some(new_password) = &update_field.password {
-        user_service.update_password_by_token(&token.0, new_password).await.map_err(|e| {
-            error!("Failed to update password: {}", e);
-            Status::InternalServerError
-        })?;
-    }
+    user_service.update_password_by_token(&token.0, &update_field.password).await.map_err(|e| {
+        error!("Failed to update password: {}", e);
+        Json(ValidationErrorResponse::from(e))
+    })?;
 
     Ok(Status::Ok)
 }
