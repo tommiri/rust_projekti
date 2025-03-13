@@ -1,4 +1,4 @@
-import VerifiedEmailCard from '@/components/VerifiedCard';
+import VerifiedEmailCard from '@/components/VerifiedEmailCard';
 
 const VerifiedEmail = () => {
   return <VerifiedEmailCard />;

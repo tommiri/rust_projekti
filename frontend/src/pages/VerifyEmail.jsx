@@ -1,11 +1,7 @@
-import VerifyEmailCard from "@/components/VefifyCard";
-
+import VerifyEmailCard from '@/components/VerifyEmailCard';
 
 const VerifyEmail = () => {
-
-  return (
-    <VerifyEmailCard />
-  );
+  return <VerifyEmailCard />;
 };
 
 export default VerifyEmail;
