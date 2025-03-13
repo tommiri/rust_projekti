@@ -15,8 +15,10 @@ const VerifiedEmailCard = () => {
     const verifyEmailHandler = async () => {
       setIsLoading(true);
       try {
-        response = await verifyEmail(token);
-        setVerificationStatus(true);
+        const response = await verifyEmail(token);
+        if (response.status === 200) {
+          setVerificationStatus(true);
+        }
       } catch (error) {
         setVerificationStatus(false);
       } finally {
@@ -30,15 +32,11 @@ const VerifiedEmailCard = () => {
     <Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle className="text-2xl">
-        {verificationStatus.success ? (
-          <>
-            Sähköposti vahvistettu
-          </>
-        ) : (
-          <>
-            Tapahtui virhe
-          </>
-        )}
+          {verificationStatus ? (
+            <>Sähköposti vahvistettu</>
+          ) : (
+            <>Tapahtui virhe</>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -49,7 +47,7 @@ const VerifiedEmailCard = () => {
           </>
         ) : (
           <>
-            {verificationStatus.success ? (
+            {verificationStatus ? (
               <>
                 <p>Sähköpostiosoite on vahvistettu.</p>
                 <p className="mt-2">Voit nyt kirjautua sisään.</p>

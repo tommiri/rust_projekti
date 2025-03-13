@@ -1,17 +1,20 @@
 use crate::db::DbPool;
-use crate::utils::errors::{AppError, Result};
 use crate::models::user::User;
-use crate::utils::config::Settings;
 use crate::services::validate_jwt;
+use crate::utils::config::Settings;
+use crate::utils::errors::{AppError, Result};
+use argon2::{
+    password_hash::{rand_core::OsRng, PasswordHasher, SaltString},
+    Argon2,
+};
 use chrono::NaiveDateTime;
 use diesel::prelude::*;
-use diesel::result::Error as DieselError;
 use diesel::r2d2::{ConnectionManager, PooledConnection};
-use argon2::{password_hash::{rand_core::OsRng, SaltString, PasswordHasher}, Argon2};
+use diesel::result::Error as DieselError;
 use regex::Regex;
 
-use crate::db::schema::{users::dsl as udsl};
 use crate::db::schema::users;
+use crate::db::schema::users::dsl as udsl;
 
 pub struct UserService {
     db_pool: DbPool,
@@ -20,45 +23,62 @@ pub struct UserService {
 
 impl UserService {
     pub fn new(db_pool: DbPool, settings: Settings) -> Result<Self> {
-        Ok(Self {
-            db_pool,
-            settings,
-        })
+        Ok(Self { db_pool, settings })
     }
 
-    fn get_user_email_and_conn(&self, token: &str) -> Result<(String, PooledConnection<ConnectionManager<MysqlConnection>>)> {
+    fn get_user_email_and_conn(
+        &self,
+        token: &str,
+    ) -> Result<(String, PooledConnection<ConnectionManager<MysqlConnection>>)> {
         let decoded_claims = validate_jwt(token, &self.settings)?;
         let user_email = decoded_claims.sub;
 
-        let conn = self.db_pool.get().map_err(|_| AppError::InternalServerError)?;
+        let conn = self
+            .db_pool
+            .get()
+            .map_err(|_| AppError::InternalServerError)?;
         Ok((user_email, conn))
     }
 
     fn validate_email_prefix(&self, email_prefix: &str) -> Result<()> {
         // Check length
         if email_prefix.is_empty() {
-            return Err(AppError::InvalidEmailFormat("Email prefix is required".to_string()));
+            return Err(AppError::InvalidEmailFormat(
+                "Email prefix is required".to_string(),
+            ));
         }
         if email_prefix.len() > 64 {
-            return Err(AppError::InvalidEmailFormat("Email prefix too long".to_string()));
+            return Err(AppError::InvalidEmailFormat(
+                "Email prefix too long".to_string(),
+            ));
         }
 
         // Check regex pattern
-        let re = Regex::new(r"^[a-zA-Z0-9!#$%&'*+\-/=?^_`.{|}~]+(?:\.[a-zA-Z0-9!#$%&'*+\-/=?^_`.{|}~]+)*$")
-            .map_err(|_| AppError::InternalServerError)?;
+        let re = Regex::new(
+            r"^[a-zA-Z0-9!#$%&'*+\-/=?^_`.{|}~]+(?:\.[a-zA-Z0-9!#$%&'*+\-/=?^_`.{|}~]+)*$",
+        )
+        .map_err(|_| AppError::InternalServerError)?;
         if !re.is_match(email_prefix) {
-            return Err(AppError::InvalidEmailFormat("Invalid characters in email prefix".to_string()));
+            return Err(AppError::InvalidEmailFormat(
+                "Invalid characters in email prefix".to_string(),
+            ));
         }
 
         // Check specific rules
         if email_prefix.starts_with('.') {
-            return Err(AppError::InvalidEmailFormat("Email prefix cannot start with a dot".to_string()));
+            return Err(AppError::InvalidEmailFormat(
+                "Email prefix cannot start with a dot".to_string(),
+            ));
         }
         if email_prefix.ends_with('.') {
-            return Err(AppError::InvalidEmailFormat("Email prefix cannot end with a dot".to_string()));
+            return Err(AppError::InvalidEmailFormat(
+                "Email prefix cannot end with a dot".to_string(),
+            ));
         }
         if email_prefix.contains("..") {
-            return Err(AppError::InvalidEmailFormat("Email prefix cannot contain consecutive dots".to_string()));
+            return Err(AppError::InvalidEmailFormat(
+                "Email prefix cannot contain consecutive dots".to_string(),
+            ));
         }
 
         Ok(())
@@ -79,10 +99,17 @@ impl UserService {
         // Validate email prefix
         // Validate email format
         if !new_email.contains('@') {
-            return Err(AppError::InvalidEmailFormat("Email must contain '@'".to_string()));
+            return Err(AppError::InvalidEmailFormat(
+                "Email must contain '@'".to_string(),
+            ));
         }
         println!("new_email: {}", new_email);
-        let email_prefix = new_email.split('@').next().ok_or(AppError::InvalidEmailFormat("Invalid email format".to_string()))?;
+        let email_prefix = new_email
+            .split('@')
+            .next()
+            .ok_or(AppError::InvalidEmailFormat(
+                "Invalid email format".to_string(),
+            ))?;
         self.validate_email_prefix(email_prefix)?;
 
         let (user_email, mut conn) = self.get_user_email_and_conn(token)?;
@@ -114,7 +141,11 @@ impl UserService {
         Ok(())
     }
 
-    pub async fn update_first_name_by_token(&self, token: &str, new_first_name: &str) -> Result<()> {
+    pub async fn update_first_name_by_token(
+        &self,
+        token: &str,
+        new_first_name: &str,
+    ) -> Result<()> {
         let (user_email, mut conn) = self.get_user_email_and_conn(token)?;
 
         diesel::update(udsl::users.filter(udsl::email.eq(user_email)))
